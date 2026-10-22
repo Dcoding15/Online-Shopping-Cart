@@ -10,7 +10,7 @@
         @csrf
         <button type="submit" style="margin-left: 89%;">Logout</button>
     </form>
-    <h1>User Dashboard</h1>
+    <!-- <h1>User Dashboard</h1> -->
 
     <section class="dashboard-profile" aria-label="Profile">
         <div class="dashboard-avatar">
