@@ -39,6 +39,7 @@ A small marketplace requires a centralized application that lets buyers discover
 ### Included in the inspected code
 
 - Phone-number authentication and logout.
+- Dashboard profile-picture display, with an initial-based placeholder when no image was uploaded.
 - Public catalogue, product detail, image retrieval, keyword search, category/type filters, price range filters, stock filtering, sorting, and pagination.
 - Admin dashboard and administration of users, sellers, products, and orders.
 - Seller dashboard and CRUD operations for seller-owned products.
@@ -110,7 +111,7 @@ An administrator can view platform metrics and manage users, sellers, products, 
 
 ### 9.1 Registration and login
 
-Registration validates the submitted name, phone number, account role, password confirmation, and optional profile image. Passwords are hashed before persistence. The user is logged in after registration. Login authenticates using phone number and password, regenerates the session, and redirects to `/dashboard`. The dashboard controller redirects administrators to the administrator dashboard; other authenticated users receive the standard dashboard view. Logout invalidates the session and regenerates the CSRF token.
+Registration validates the submitted name, phone number, account role, password confirmation, and optional profile image. Passwords are hashed before persistence. The user is logged in after registration. Login authenticates using phone number and password, regenerates the session, and redirects to `/dashboard`. The dashboard controller redirects administrators to the administrator dashboard; other authenticated users receive the standard dashboard view, including their profile image when available. The authenticated `GET /profile/picture` route serves the signed-in user's image; users without an uploaded image see an initial-based placeholder. Logout invalidates the session and regenerates the CSRF token.
 
 ### 9.2 Product discovery
 
@@ -135,6 +136,8 @@ The main business tables are `users`, `products`, `cart`, `orders`, and `order_i
 ## 11. Testing and Verification
 
 The repository contains feature tests for authentication, catalogue behavior, cart operations, checkout, seller management, administration, and seeders. The project's own `TESTING.txt` records a prior successful run of 40 tests and 162 assertions; this historical result was not reproducible in the current analysis environment because PHPUnit stopped with `Class "DOMDocument" not found`. PHP syntax checks passed and Laravel successfully listed 43 routes. The Vite build could not complete because the archived `node_modules` lacked a platform-specific Rolldown native binding; the normal `npm run build` also reported a permission error for the Vite executable.
+
+The focused authentication feature tests, including uploaded profile-image display and access behavior, pass with 4 tests and 23 assertions.
 
 These are environment-blocked checks, not proof that application tests or the frontend build fail on a correctly provisioned development machine.
 

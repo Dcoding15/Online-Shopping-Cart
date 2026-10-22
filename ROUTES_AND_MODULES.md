@@ -19,6 +19,9 @@
 | Method | URI | Route name | Middleware | Purpose |
 |---|---|---|---|---|
 | GET | `/dashboard` | `dashboard` | `auth` | Standard dashboard; redirects admins to admin dashboard |
+| GET | `/profile/picture` | `profile.picture` | `auth` | Return the signed-in user's profile image |
+
+The standard dashboard displays the user's uploaded profile picture or an initial-based placeholder when no picture exists. The profile image route is available only to authenticated users.
 
 ## 3. Seller Product Management
 
