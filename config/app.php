@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,11 +78,15 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'hi'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_IN'),
+
+    'currency_locale' => env('APP_CURRENCY_LOCALE', 'en_IN'),
+
+    'currency_symbol' => env('APP_CURRENCY_SYMBOL', '₹'),
 
     /*
     |--------------------------------------------------------------------------
