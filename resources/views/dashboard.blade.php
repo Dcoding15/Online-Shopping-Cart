@@ -12,26 +12,44 @@
     </form>
     <h1>User Dashboard</h1>
 
-    <h2>Welcome, {{ $user->user_name }}</h2>
+    <section class="dashboard-profile" aria-label="Profile">
+        <div class="dashboard-avatar">
+            @if ($user->user_profile_pic)
+                <img
+                    src="{{ route('profile.picture') }}"
+                    alt="{{ $user->user_name }}'s profile picture"
+                >
+            @else
+                <span class="dashboard-avatar-placeholder" aria-hidden="true">
+                    {{ strtoupper(substr($user->user_name ?? 'U', 0, 1)) }}
+                </span>
+                <span class="dashboard-avatar-caption">No profile picture</span>
+            @endif
+        </div>
 
-    <table border="1" cellpadding="6" cellspacing="0">
-        <tr>
-            <th>User Type:</th>
-            <td>{{ ucfirst($user->user_type) }}</td>
-        </tr>
-        <tr>
-            <th>Phone:</th>
-            <td>{{ $user->phone_no }}</td>
-        </tr>
-        <tr>
-            <th>Address:</th>
-            <td>{{ $user->user_addr ?? 'Not set' }}</td>
-        </tr>
-        <tr>
-            <th>Wallet Balance:</th>
-            <td>₹{{ number_format($user->user_wallet_amount, 2) }}</td>
-        </tr>
-    </table>
+        <div class="dashboard-profile-details">
+            <h2>Welcome, {{ $user->user_name }}</h2>
+
+            <table>
+                <tr>
+                    <th>User Type:</th>
+                    <td>{{ ucfirst($user->user_type) }}</td>
+                </tr>
+                <tr>
+                    <th>Phone:</th>
+                    <td>{{ $user->phone_no }}</td>
+                </tr>
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ $user->user_addr ?? 'Not set' }}</td>
+                </tr>
+                <tr>
+                    <th>Wallet Balance:</th>
+                    <td>₹{{ number_format($user->user_wallet_amount, 2) }}</td>
+                </tr>
+            </table>
+        </div>
+    </section>
 
     <br>
 

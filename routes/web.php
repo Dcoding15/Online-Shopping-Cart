@@ -65,6 +65,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile/picture', [CustomerController::class, 'picture'])->name('profile.picture');
 
     /*
     |--------------------------------------------------------------------------

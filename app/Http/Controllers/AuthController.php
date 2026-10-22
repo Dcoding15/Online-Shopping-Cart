@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 class AuthController extends Controller
 {
@@ -33,24 +34,31 @@ class AuthController extends Controller
         $profilePicture = null;
 
         if ($request->hasFile('user_profile_pic')) {
-            $profilePicture =
-                file_get_contents(
-                    $request->file('user_profile_pic')->getRealPath()
-                );
+            $profilePicture = fopen($request->file('user_profile_pic')->getRealPath(), 'rb');
+
+            if ($profilePicture === false) {
+                throw new RuntimeException('Unable to read the uploaded profile picture.');
+            }
         }
 
-        $user = User::create([
-            'user_name' => $request->user_name,
-            'phone_no' => $request->phone_no,
-            'user_addr' => $request->user_addr,
-            'user_profile_pic' => $profilePicture,
-            'date_of_birth' => $request->date_of_birth,
-            'user_type' => $request->user_type,
-            'user_cart_quantity' => 0,
-            'userpayment_confirmation' => false,
-            'user_wallet_amount' => 0,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            $user = User::create([
+                'user_name' => $request->user_name,
+                'phone_no' => $request->phone_no,
+                'user_addr' => $request->user_addr,
+                'user_profile_pic' => $profilePicture,
+                'date_of_birth' => $request->date_of_birth,
+                'user_type' => $request->user_type,
+                'user_cart_quantity' => 0,
+                'userpayment_confirmation' => false,
+                'user_wallet_amount' => 0,
+                'password' => Hash::make($request->password),
+            ]);
+        } finally {
+            if (is_resource($profilePicture)) {
+                fclose($profilePicture);
+            }
+        }
 
         Auth::login($user);
 
