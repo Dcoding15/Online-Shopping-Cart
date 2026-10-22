@@ -1,0 +1,213 @@
+ONLINE SHOPPING CART - TESTING GUIDE
+===================================
+
+This file summarizes the automated tests currently in the project, what
+behavior they cover, and how to run them.
+
+
+1. TEST FRAMEWORK AND DATABASE
+------------------------------
+
+The project uses Pest on top of PHPUnit. Tests are located in:
+
+    tests\Feature
+    tests\Unit
+
+The PHPUnit configuration sets APP_ENV=testing and DB_CONNECTION=pgsql.
+Use a dedicated PostgreSQL test database. Never run tests against production
+or any database whose existing data must be preserved.
+
+Feature tests use database transactions so data created during a test is
+rolled back. These transactions do not create or select a safe database:
+the configured database connection is still used.
+
+
+2. RUNNING TESTS
+----------------
+
+Run the complete suite:
+
+    php artisan test --compact
+
+Run one test file:
+
+    php artisan test --compact tests\Feature\CartTest.php
+
+Run a specific test by name:
+
+    php artisan test --compact --filter="insufficient funds"
+
+Run the unit test suite only:
+
+    php artisan test --compact tests\Unit
+
+Run the feature test suite only:
+
+    php artisan test --compact tests\Feature
+
+The most recently verified full run completed with 40 tests and 162
+assertions passing. Test results can change as the code or environment
+changes; rerun the suite before relying on this status.
+
+
+3. FEATURE TEST COVERAGE
+------------------------
+
+AUTHENTICATION - tests\Feature\AuthTest.php
+
+- Checks registration by phone number without an email address.
+- Confirms the submitted account is stored with the buyer role and the new
+  user is authenticated.
+
+PUBLIC PRODUCT CATALOGUE - tests\Feature\BuyerProductTest.php
+
+- Checks that the public catalogue displays product names and rupee prices.
+- Checks keyword search.
+- Checks category and product-type filters.
+- Checks the in-stock-only filter excludes out-of-stock products.
+- Checks the product details page displays description and stock status.
+- Checks an out-of-stock product shows the correct notice.
+
+CART - tests\Feature\CartTest.php
+
+- Checks adding an in-stock product and displaying cart totals.
+- Checks that quantities above available stock and out-of-stock products
+  cannot be added.
+- Checks adding the same product again increments the existing line quantity.
+- Checks updating a line quantity, removing a line, and clearing the cart.
+- Checks that one buyer cannot manipulate another buyer's cart item.
+
+CHECKOUT AND ORDERS - tests\Feature\OrderTest.php
+
+- Checks checkout summary, shipping address, and buyer wallet balance.
+- Checks checkout redirects when the cart is empty.
+- Checks a successful purchase deducts the buyer wallet, credits the seller,
+  reduces stock, creates an order and item, and clears the buyer's cart.
+- Checks insufficient wallet balance is rejected without creating an order
+  for that buyer or changing the buyer wallet/product stock.
+- Checks a buyer can view their invoice.
+- Checks a buyer cannot view another buyer's invoice.
+
+SELLER MANAGEMENT - tests\Feature\SellerTest.php
+
+- Checks the admin seller list and seller creation/update.
+- Checks sellers with products cannot be deleted and their records remain.
+- Checks sellers without products can be deleted.
+- Checks guests and non-admin users cannot manage sellers.
+- Checks seller product pages show the supported categories and rupee pricing.
+
+ADMIN - tests\Feature\AdminTest.php
+
+- Checks the admin dashboard and its key metrics.
+- Checks buyers and sellers are forbidden from admin routes and guests are
+  redirected to login.
+- Checks filtering/searching the user list.
+- Checks an admin can update a user's role and wallet amount.
+- Checks an admin cannot delete their own account.
+- Checks platform order list and detailed order invoice.
+- Checks an admin can delete a product.
+
+DATABASE SEEDER - tests\Feature\DatabaseSeederTest.php
+
+- Checks the top-level seeder creates 5 admins, 15 sellers, and 30 buyers.
+- Checks it creates 50 products and those products belong to sellers.
+
+ROUTES AND CONTROLLERS
+
+The feature tests exercise routes and controllers together by making HTTP
+requests through Laravel's test client. They do not call controller methods
+directly.
+
+- AuthTest exercises the registration POST route and authenticated result.
+- BuyerProductTest exercises public catalogue, search/filter, product detail,
+  and stock-status routes.
+- CartTest exercises buyer cart read/write routes, stock validation, and
+  ownership checks.
+- OrderTest exercises checkout, order submission, order history/invoice,
+  wallet and stock effects, and buyer ownership checks.
+- SellerTest exercises admin seller-management routes and seller product
+  pages, including guest/non-admin access restrictions.
+- AdminTest exercises admin dashboard, user, product, and order routes,
+  including guest and non-admin access restrictions.
+
+The route definitions live in routes\web.php. To inspect the currently
+registered routes and their middleware, run:
+
+    php artisan route:list
+
+There is no dedicated test that asserts every route's HTTP method, name, or
+middleware declaration. Route behavior is tested only where covered by the
+feature tests listed above.
+
+DATABASE BEHAVIOR
+
+Database behavior is verified through real queries against the configured
+PostgreSQL test database. The feature tests use DatabaseTransactions and
+create their own records with factories or model creation.
+
+- Cart tests check persisted cart quantities, updates, removals, and that a
+  different buyer cannot change another buyer's cart.
+- Order tests check order/order-item records and verify wallet, stock, and
+  cart state after successful or rejected checkout.
+- Seller/admin tests check persisted user and product changes and deletion
+  behavior.
+- DatabaseSeederTest checks seeded role counts, product counts, and seller
+  ownership.
+
+There is no dedicated migration/schema test for every column, enum/check
+constraint, foreign key, unique constraint, or cascade rule. The regular
+feature suite also does not run a clean migrate:fresh cycle automatically.
+Use a disposable PostgreSQL database to check a clean installation:
+
+    php artisan migrate:fresh
+    php artisan migrate:status
+
+The first command drops all tables in the selected database. Verify the
+database connection and target before running it; never run it against
+valuable, shared, staging, or production data.
+
+FRAMEWORK SMOKE TESTS
+
+- tests\Feature\ExampleTest.php checks that the application returns a
+  successful response.
+- tests\Unit\ExampleTest.php contains a basic example unit assertion. It is
+  a placeholder and does not cover marketplace business behavior.
+
+
+4. WHAT THESE TESTS DO NOT FULLY VERIFY
+---------------------------------------
+
+The existing suite exercises important application flows, but it is not a
+complete production or security audit. It does not comprehensively verify:
+
+- Real browser rendering, mobile layout, accessibility, or JavaScript
+  interactions.
+- Simultaneous/concurrent purchases, lock behavior under load, or database
+  deadlock/retry handling.
+- Every validation rule and malformed input for every form.
+- Image upload MIME/content edge cases and image retrieval for every format.
+- Every role and route combination for every endpoint.
+- Production deployment, email delivery, external payment processing, or
+  real-money settlement. Checkout currently uses the application's wallet.
+- Performance with a large dataset, queue workers, or multi-server sessions.
+
+Add targeted tests when these behaviors become requirements or change.
+
+
+5. TEST FAILURE TRIAGE
+----------------------
+
+When a test fails:
+
+1. Read the failed test name and assertion in the output.
+2. Confirm the test command used the dedicated PostgreSQL test database.
+3. Check whether the test assumes a globally empty table; prefer checking
+   records belonging to the test's own user/ID.
+4. Check whether pagination or ordering means newly created data is not on
+   the first page.
+5. Rerun the affected file, then rerun the complete suite.
+
+The tests rely on PostgreSQL-specific application behavior. A failure caused
+by an SQLite driver, unsupported SQL, missing PostgreSQL extension, or
+incorrect database configuration is an environment/setup failure until the
+application behavior is verified on PostgreSQL.

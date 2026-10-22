@@ -1,0 +1,184 @@
+ONLINE SHOPPING CART - INSTALLATION AND DEVELOPMENT
+==================================================
+
+This guide describes a local Windows setup. The application is built with
+Laravel 13, PHP 8.3 or newer, and PostgreSQL. PostgreSQL is required by
+application features and migrations that use PostgreSQL-specific SQL.
+
+
+1. REQUIREMENTS
+---------------
+
+- PHP 8.3 or newer with these extensions enabled:
+  - pdo_pgsql and pgsql
+  - fileinfo
+  - mbstring
+  - openssl
+  - zip
+- Composer
+- PostgreSQL server and a PostgreSQL user/database for this application
+- Node.js and npm
+
+Check PHP and the required extensions:
+
+    php -v
+    php -m
+
+If an extension is missing, enable it in the php.ini used by the PHP command
+line. To create php.ini, copy php.ini-development (or php.ini-production)
+from the PHP installation folder and rename the copy to php.ini. Restart
+terminals after changing the PHP configuration.
+
+
+2. INSTALL DEPENDENCIES
+-----------------------
+
+Open PowerShell in the project folder:
+
+    cd C:\path\to\online_shopping_cart
+    composer install
+    npm ci
+
+If npm ci cannot use the existing lock file, use npm install instead.
+
+
+3. CONFIGURE THE APPLICATION
+----------------------------
+
+Create a local environment file if one does not already exist:
+
+    Copy-Item .env.example .env
+
+Edit .env and configure the application key, URL, and PostgreSQL connection.
+For example:
+
+    APP_NAME="Online Shopping Cart"
+    APP_ENV=local
+    APP_DEBUG=true
+    APP_URL=http://localhost:8000
+
+    DB_CONNECTION=pgsql
+    DB_HOST=127.0.0.1
+    DB_PORT=5432
+    DB_DATABASE=online_shopping_cart
+    DB_USERNAME=your_postgres_user
+    DB_PASSWORD=your_postgres_password
+
+Create the PostgreSQL database and make sure the configured user has access
+to it. Use your own database credentials; do not commit .env to source
+control or use production credentials in a local or test environment.
+
+The supplied .env.example defaults to SQLite. Change DB_CONNECTION to pgsql
+as shown above: SQLite is not supported by all of this application's
+PostgreSQL-specific queries and migrations.
+
+Generate the Laravel application key:
+
+    php artisan key:generate
+
+
+4. CREATE THE DATABASE AND LOAD DEMO DATA
+-----------------------------------------
+
+Run the database migrations:
+
+    php artisan migrate
+
+Optionally create fake/demo users and products:
+
+    php artisan db:seed
+
+The current seeders add 5 admin accounts, 15 seller accounts, 30 buyer
+accounts, and 50 products. Products are assigned to sellers. Seeder runs
+are additive: running the command again creates additional records.
+
+Factory-generated demo accounts use the password "password". This is for
+local development only. Never use the demo password for a public deployment.
+
+
+5. RUN THE APPLICATION
+----------------------
+
+Start the Laravel development server:
+
+    php artisan serve
+
+For frontend development, open a second terminal in the project folder and
+run:
+
+    npm run dev
+
+Open the local URL printed by php artisan serve, normally:
+
+    http://localhost:8000
+
+For a production-style frontend asset build:
+
+    npm run build
+
+
+6. RUN THE TESTS
+----------------
+
+The test configuration uses PostgreSQL. Create a dedicated, empty test
+database and configure it in .env.testing (or equivalent test environment
+variables) before running the suite. Never point tests at a production
+database or a database containing data that must be preserved.
+
+Run all tests:
+
+    php artisan test --compact
+
+Run an individual feature test:
+
+    php artisan test --compact tests\Feature\OrderTest.php
+
+The tests use database transactions, but they still connect to the database
+configured for testing. Keep that database separate from development data.
+
+
+7. COMMON COMMANDS
+------------------
+
+    php artisan route:list
+        List registered application routes.
+
+    php artisan migrate:status
+        Show which migrations have run.
+
+    php artisan db:seed
+        Add the demo data (does not clear existing data).
+
+    php artisan optimize:clear
+        Clear cached Laravel configuration, routes, and views.
+
+
+8. RESETTING A LOCAL DATABASE - DESTRUCTIVE
+-------------------------------------------
+
+Only for a disposable local database whose contents can be deleted:
+
+    php artisan migrate:fresh --seed
+
+This command DROPS ALL TABLES in the database Laravel is currently using,
+then recreates the schema and demo data. Verify DB_CONNECTION and
+DB_DATABASE in .env before running it. Do not use it on a shared, staging,
+or production database.
+
+
+9. TROUBLESHOOTING
+------------------
+
+- "could not find driver": enable pdo_pgsql in the php.ini used by the PHP
+  command line, then restart the terminal.
+- PostgreSQL connection refused: confirm the PostgreSQL service is running,
+  DB_HOST/DB_PORT are correct, and the server accepts local connections.
+- Authentication or database-not-found error: verify DB_DATABASE,
+  DB_USERNAME, DB_PASSWORD, and the database user's permissions.
+- Migrations use unexpected settings: check .env and clear cached settings
+  with php artisan optimize:clear.
+- Frontend assets are missing during development: run npm run dev. For a
+  compiled build, run npm run build.
+- Seeding fails on an enum/check constraint: verify migrations completed
+  successfully and that the connection points to PostgreSQL.
+
