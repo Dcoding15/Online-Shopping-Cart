@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -81,7 +82,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Stream binary product picture stored in PostgreSQL bytea.
+     * Serve the product picture from public storage.
      */
     public function picture(Product $product)
     {
@@ -89,13 +90,14 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $data = is_resource($product->product_picture)
-            ? stream_get_contents($product->product_picture)
-            : $product->product_picture;
+        $path = Storage::disk('public')->path($product->product_picture);
 
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->buffer($data) ?: 'image/jpeg';
+        if (! file_exists($path)) {
+            abort(404);
+        }
 
-        return response($data)->header('Content-Type', $mimeType);
+        $mimeType = mime_content_type($path) ?: 'image/jpeg';
+
+        return response()->file($path, ['Content-Type' => $mimeType]);
     }
 }

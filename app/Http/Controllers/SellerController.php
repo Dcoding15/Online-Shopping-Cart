@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class SellerController extends Controller
 {
@@ -197,9 +198,9 @@ class SellerController extends Controller
             'product_meta_data' => 'nullable|string',
         ]);
 
-        $pictureBinary = null;
+        $picturePath = null;
         if ($request->hasFile('product_picture')) {
-            $pictureBinary = file_get_contents($request->file('product_picture')->getRealPath());
+            $picturePath = $request->file('product_picture')->store('product-pictures', 'public');
         }
 
         $metaData = null;
@@ -213,7 +214,7 @@ class SellerController extends Controller
             'user_id' => Auth::id(),
             'product_available_quantity' => $validated['product_available_quantity'],
             'product_price' => $validated['product_price'],
-            'product_picture' => $pictureBinary,
+            'product_picture' => $picturePath,
             'product_type' => $validated['product_type'],
             'product_description' => $validated['product_description'] ?? null,
             'product_category' => $validated['product_category'],
@@ -270,7 +271,11 @@ class SellerController extends Controller
         ];
 
         if ($request->hasFile('product_picture')) {
-            $updateData['product_picture'] = file_get_contents($request->file('product_picture')->getRealPath());
+            // Delete the old image if one exists
+            if ($product->product_picture) {
+                Storage::disk('public')->delete($product->product_picture);
+            }
+            $updateData['product_picture'] = $request->file('product_picture')->store('product-pictures', 'public');
         }
 
         if (isset($validated['product_meta_data'])) {
@@ -293,6 +298,10 @@ class SellerController extends Controller
         $product = Product::where('product_id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
+
+        if ($product->product_picture) {
+            Storage::disk('public')->delete($product->product_picture);
+        }
 
         $product->delete();
 
