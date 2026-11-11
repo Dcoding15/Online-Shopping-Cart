@@ -6,6 +6,7 @@
 </head>
 <body>
 
+    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
     <h1>Seller Dashboard</h1>
 
     <p>Welcome, {{ auth()->user()->user_name ?? 'Seller' }}</p>
