@@ -5,6 +5,7 @@
     <title>Edit Seller</title>
 </head>
 <body>
+    @include('partials.app-header')
 
     <h1>Edit Seller</h1>
 
@@ -46,12 +47,9 @@
         <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $seller->date_of_birth ? \Carbon\Carbon::parse($seller->date_of_birth)->format('Y-m-d') : '') }}">
         <br><br>
 
-        <label>Wallet Amount:</label><br>
-        <input type="number" step="0.01" name="user_wallet_amount" value="{{ old('user_wallet_amount', $seller->user_wallet_amount) }}">
-        <br><br>
-
         <label>New Password (leave blank to keep current):</label><br>
-        <input type="password" name="password">
+        <input type="password" name="password" minlength="8" autocomplete="new-password">
+        <small>If changing it, use at least 8 characters, including uppercase and lowercase letters, a number, and a symbol.</small>
         <br><br>
 
         <button type="submit">Update Seller</button>

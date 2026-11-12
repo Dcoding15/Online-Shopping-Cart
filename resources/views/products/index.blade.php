@@ -5,22 +5,24 @@
     <link rel="stylesheet" href="{{ asset('css/market.css') }}">
 </head>
 <body class="storefront">
-    <header class="site-header">
-        <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
+    @include('partials.app-header')
+    <fieldset class="site-nav-fieldset">
+        <legend>Main navigation</legend>
         <nav class="site-nav" aria-label="Main navigation">
         @auth
             <span>{{ auth()->user()->user_name }}</span>
             <a href="{{ route('dashboard') }}">Dashboard</a>
-            <a href="{{ route('cart.index') }}">Cart ({{ auth()->user()->user_cart_quantity }})</a>
-            <a href="{{ route('orders.index') }}">Orders</a>
+            @if(auth()->user()->isBuyer())
+                <a href="{{ route('cart.index') }}">Cart ({{ auth()->user()->user_cart_quantity }})</a>
+                <a href="{{ route('orders.index') }}">Orders</a>
+            @endif
             @if(auth()->user()->isSeller())<a href="{{ route('seller.dashboard') }}">Seller</a>@endif
-            <form action="{{ route('logout') }}" method="POST">@csrf<button type="submit">Logout</button></form>
         @else
             <a href="{{ route('login') }}">Login</a>
             <a href="{{ route('register') }}">Create account</a>
         @endauth
         </nav>
-    </header>
+    </fieldset>
 
     <main class="storefront-main">
         <section class="market-hero">

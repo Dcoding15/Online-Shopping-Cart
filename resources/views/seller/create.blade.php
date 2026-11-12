@@ -5,6 +5,7 @@
     <title>Add Seller</title>
 </head>
 <body>
+    @include('partials.app-header')
 
     <h1>Add New Seller</h1>
 
@@ -41,12 +42,9 @@
         <input type="date" name="date_of_birth" value="{{ old('date_of_birth') }}">
         <br><br>
 
-        <label>Wallet Amount:</label><br>
-        <input type="number" step="0.01" name="user_wallet_amount" value="{{ old('user_wallet_amount', '0.00') }}">
-        <br><br>
-
         <label>Password:</label><br>
-        <input type="password" name="password" required>
+        <input type="password" name="password" minlength="8" autocomplete="new-password" required>
+        <small>Use at least 8 characters, including uppercase and lowercase letters, a number, and a symbol.</small>
         <br><br>
 
         <button type="submit">Create Seller</button>

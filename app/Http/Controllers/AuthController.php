@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use RuntimeException;
 
 class AuthController extends Controller
@@ -27,7 +28,7 @@ class AuthController extends Controller
             'user_addr' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'user_type' => 'required|in:seller,buyer',
-            'password' => 'required|min:6|confirmed',
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
             'user_profile_pic' => 'nullable|image|max:2048',
         ]);
 
@@ -50,8 +51,6 @@ class AuthController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'user_type' => $request->user_type,
                 'user_cart_quantity' => 0,
-                'userpayment_confirmation' => false,
-                'user_wallet_amount' => 0,
                 'password' => Hash::make($request->password),
             ]);
         } finally {

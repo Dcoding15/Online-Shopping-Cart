@@ -32,8 +32,6 @@ class UserFactory extends Factory
             'user_addr' => fake()->address(),
             'user_type' => fake()->randomElement(['seller', 'admin', 'buyer']),
             'user_cart_quantity' => 0,
-            'userpayment_confirmation' => false,
-            'user_wallet_amount' => fake()->randomFloat(2, 0, 500),
             'date_of_birth' => fake()->date(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

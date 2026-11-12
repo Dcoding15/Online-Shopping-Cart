@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 
 class SellerController extends Controller
 {
@@ -48,8 +49,7 @@ class SellerController extends Controller
             'phone_no' => 'required|string|max:150|unique:users,phone_no',
             'user_addr' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
-            'user_wallet_amount' => 'nullable|numeric|min:0',
-            'password' => 'required|string|min:6',
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         User::create([
@@ -59,8 +59,6 @@ class SellerController extends Controller
             'date_of_birth' => $validated['date_of_birth'] ?? null,
             'user_type' => 'seller',
             'user_cart_quantity' => 0,
-            'userpayment_confirmation' => false,
-            'user_wallet_amount' => $validated['user_wallet_amount'] ?? 0,
             'password' => Hash::make($validated['password']),
         ]);
 
@@ -95,8 +93,7 @@ class SellerController extends Controller
             'phone_no' => 'required|string|max:150|unique:users,phone_no,'.$seller->user_id.',user_id',
             'user_addr' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
-            'user_wallet_amount' => 'nullable|numeric|min:0',
-            'password' => 'nullable|string|min:6',
+            'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         $updateData = [
@@ -104,7 +101,6 @@ class SellerController extends Controller
             'phone_no' => $validated['phone_no'],
             'user_addr' => $validated['user_addr'] ?? null,
             'date_of_birth' => $validated['date_of_birth'] ?? null,
-            'user_wallet_amount' => $validated['user_wallet_amount'] ?? $seller->user_wallet_amount,
         ];
 
         if (! empty($validated['password'])) {

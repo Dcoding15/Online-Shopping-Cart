@@ -1,6 +1,6 @@
 # Online Shopping Cart
 
-A Laravel-based multi-seller marketplace where visitors can browse products, buyers can manage a cart and place wallet-funded orders, sellers can manage their own listings, and administrators can oversee marketplace activity.
+A Laravel-based multi-seller marketplace where visitors can browse products, buyers can manage a cart and pay for orders through Razorpay, sellers can manage their own listings, and administrators can oversee marketplace activity.
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@ A Laravel-based multi-seller marketplace where visitors can browse products, buy
 
 The application follows Laravel's server-rendered Model–View–Controller (MVC) pattern. Routes map HTTP requests to controllers. Controllers validate input and implement workflows. Eloquent models represent database entities and relationships, and Blade templates render the pages returned to the browser.
 
-The project is intended as a marketplace demonstration and does not provide external payment processing, shipping integrations, or real-money settlement.
+The project is intended as a marketplace demonstration and does not provide shipping integrations or seller payouts.
 
 ## Features
 
@@ -51,8 +51,8 @@ The project is intended as a marketplace demonstration and does not provide exte
 
 - Add products to a buyer-specific cart, change quantities, remove items, or clear the cart.
 - Validate stock and prevent sellers from purchasing their own products.
-- Review order total and wallet balance before checkout.
-- Submit a shipping address and pay using the application's internal wallet.
+- Review the order total and submit a shipping address at checkout.
+- Pay through Razorpay Checkout using supported card and UPI methods, including UPI QR where available.
 - View order history and itemized invoices.
 
 ### Administration
@@ -88,9 +88,9 @@ Browser
   -> Browser
 ```
 
-Checkout is handled as a database transaction. It rechecks buyer funds and product stock under row locks, then debits the buyer wallet, credits seller wallets, decrements inventory, creates the order and its item records, and clears the cart. A transaction keeps these database changes together.
+Checkout creates a pending local order and Razorpay payment order. The server verifies Razorpay's signature and confirms the captured amount before decrementing stock and clearing the buyer's cart. If stock runs out after payment, the application requests a refund instead of fulfilling the order.
 
-The wallet is an internal application balance. It is not connected to a bank, card processor, or external payment gateway.
+Razorpay credentials are required for checkout. Use test-mode credentials during development. Payment methods shown in Checkout depend on the methods enabled for the Razorpay account.
 
 ## Roles and Access
 
@@ -107,10 +107,10 @@ Registration allows buyer and seller roles; it does not provide public admin reg
 
 | Table | Purpose |
 |---|---|
-| `users` | User identity, role, profile, wallet, and cart quantity |
+| `users` | User identity, role, profile, and cart quantity |
 | `products` | Seller-owned product details, price, inventory, and metadata |
 | `cart` | Buyer/product cart lines and quantities |
-| `orders` | Buyer, order total, payment status, and shipping address |
+| `orders` | Buyer, order total, shipping address, payment status, and Razorpay references |
 | `order_items` | Product-name and price snapshots for each purchased item |
 
 The primary business relationships are:
@@ -185,9 +185,12 @@ DB_PORT=5432
 DB_DATABASE=online_shopping_cart
 DB_USERNAME=your_local_database_user
 DB_PASSWORD=your_local_database_password
+
+RAZORPAY_KEY_ID=rzp_test_your_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_test_key_secret
 ```
 
-Use your own local credentials. Do not commit or share `.env`, and do not use production credentials for development or tests. Generate the application key and prepare the database:
+Use your own local database credentials and Razorpay test keys from your Razorpay Dashboard. Do not commit or share `.env`, and do not use production credentials for development or tests. Generate the application key and prepare the database:
 
 ```bash
 php artisan key:generate
@@ -226,9 +229,9 @@ Optionally create sample users and products:
 php artisan db:seed
 ```
 
-The seeders create 5 admins, 15 sellers, 30 buyers, and 50 products. Seeded users share the factory password `password`; generated phone numbers, wallet balances, and product values vary. Use these accounts only in local development.
+The seeders create 5 admins, 15 sellers, 30 buyers, and 50 products. Seeded users share the factory password `password`; generated phone numbers and product values vary. Use these accounts only in local development.
 
-Seeding is additive: running it again adds more records. Before demonstrating checkout, select a buyer whose wallet covers the chosen purchase and a product with enough stock.
+Seeding is additive: running it again adds more records. Configure Razorpay test credentials and use a product with enough stock before trying checkout.
 
 ## Tests
 
@@ -257,6 +260,6 @@ php artisan migrate:status
 
 - **Secrets:** Keep `.env` and all credentials private. Remove secrets from any archive or public repository and rotate them if they have been exposed.
 - **Database reset:** `php artisan migrate:fresh --seed` drops all tables in the configured database. Use it only with a disposable local database after verifying the active connection.
-- **Demo payment:** Checkout changes internal wallet balances only. No external payment gateway is integrated.
+- **Payments:** Checkout requires Razorpay test/live credentials. Card and UPI options are offered by Razorpay Checkout according to account settings; no seller payout integration is included.
 - **Seeder behavior:** Seeders add records and are not idempotent by default.
 - **Production readiness:** Before deployment, configure secure production environment settings, review concurrency error handling, validate all incoming values, and run tests against a properly configured PostgreSQL environment.

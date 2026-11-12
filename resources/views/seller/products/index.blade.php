@@ -5,6 +5,7 @@
     <title>My Products</title>
 </head>
 <body>
+    @include('partials.app-header')
 
     <h1>My Products</h1>
 
@@ -16,10 +17,13 @@
         <p style="color: red;">{{ session('error') }}</p>
     @endif
 
-    <p>
-        <a href="{{ route('seller.dashboard') }}">Dashboard</a> |
-        <a href="{{ route('seller.products.create') }}">Add Product</a>
-    </p>
+    <fieldset class="page-navigation">
+        <legend>Seller navigation</legend>
+        <nav class="page-nav" aria-label="Seller navigation">
+            <a href="{{ route('seller.dashboard') }}">Dashboard</a>
+            <a href="{{ route('seller.products.create') }}">Add Product</a>
+        </nav>
+    </fieldset>
 
     @if($products->count() > 0)
         <table border="1" cellpadding="8" cellspacing="0">

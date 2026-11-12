@@ -28,8 +28,6 @@ class User extends Authenticatable
         'date_of_birth',
         'user_type',
         'user_cart_quantity',
-        'userpayment_confirmation',
-        'user_wallet_amount',
         'password',
     ];
 
@@ -42,8 +40,6 @@ class User extends Authenticatable
     {
         return [
             'date_of_birth' => 'date',
-            'userpayment_confirmation' => 'boolean',
-            'user_wallet_amount' => 'decimal:2',
         ];
     }
 
@@ -87,13 +83,5 @@ class User extends Authenticatable
     public function isBuyer()
     {
         return $this->user_type === 'buyer';
-    }
-
-    /**
-     * Backward compatibility accessor for renamed column.
-     */
-    public function getUserpaymentConfirmantionAttribute(): ?bool
-    {
-        return $this->userpayment_confirmation;
     }
 }

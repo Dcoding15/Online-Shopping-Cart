@@ -49,8 +49,8 @@ Create a local environment file if one does not already exist:
 
     Copy-Item .env.example .env
 
-Edit .env and configure the application key, URL, and PostgreSQL connection.
-For example:
+Edit .env and configure the application URL, PostgreSQL connection, and
+Razorpay test credentials. For example:
 
     APP_NAME="Online Shopping Cart"
     APP_ENV=local
@@ -64,13 +64,17 @@ For example:
     DB_USERNAME=your_postgres_user
     DB_PASSWORD=your_postgres_password
 
+    RAZORPAY_KEY_ID=rzp_test_your_key_id
+    RAZORPAY_KEY_SECRET=your_razorpay_test_key_secret
+
 Create the PostgreSQL database and make sure the configured user has access
 to it. Use your own database credentials; do not commit .env to source
 control or use production credentials in a local or test environment.
 
-The supplied .env.example defaults to SQLite. Change DB_CONNECTION to pgsql
-as shown above: SQLite is not supported by all of this application's
-PostgreSQL-specific queries and migrations.
+Use Razorpay test keys from your Razorpay Dashboard while developing. The
+Razorpay Checkout displays the card and UPI methods enabled for that account;
+UPI QR availability depends on the checkout device and account configuration.
+Never commit or share the key secret.
 
 Generate the Laravel application key:
 
@@ -83,6 +87,10 @@ Generate the Laravel application key:
 Run the database migrations:
 
     php artisan migrate
+
+The wallet-removal migration permanently drops user wallet balances and
+payment-confirmation fields. Back up any database you need to preserve before
+running migrations.
 
 Optionally create fake/demo users and products:
 

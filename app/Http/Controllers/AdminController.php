@@ -67,7 +67,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Edit user profile, role, and wallet balance.
+     * Edit user profile and role.
      */
     public function editUser($id)
     {
@@ -77,7 +77,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Update user details and wallet amount.
+     * Update user details.
      */
     public function updateUser(Request $request, $id)
     {
@@ -88,7 +88,6 @@ class AdminController extends Controller
             'phone_no' => 'required|string|max:150|unique:users,phone_no,'.$user->user_id.',user_id',
             'user_type' => 'required|in:admin,seller,buyer',
             'user_addr' => 'nullable|string|max:255',
-            'user_wallet_amount' => 'required|numeric|min:0',
         ]);
 
         $user->update([
@@ -96,7 +95,6 @@ class AdminController extends Controller
             'phone_no' => $validated['phone_no'],
             'user_type' => $validated['user_type'],
             'user_addr' => $validated['user_addr'] ?? null,
-            'user_wallet_amount' => $validated['user_wallet_amount'],
         ]);
 
         return redirect()

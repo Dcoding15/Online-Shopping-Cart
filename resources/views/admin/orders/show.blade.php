@@ -5,11 +5,7 @@
     <title>Admin - Order Invoice #{{ $order->order_id }}</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
 
     <p>
         <a href="{{ route('admin.orders.index') }}">← Back to All Orders</a> |
@@ -39,15 +35,27 @@
         </tr>
         <tr>
             <th align="left">Order Status:</th>
-            <td><strong style="color: green;">{{ ucfirst($order->order_status) }}</strong></td>
+            <td><strong style="color: green;">{{ ucwords(str_replace('_', ' ', $order->order_status)) }}</strong></td>
         </tr>
         <tr>
             <th align="left">Payment Status:</th>
             <td>
                 @if ($order->payment_confirmed)
-                    <strong style="color: green;">Confirmed (Wallet)</strong>
+                    <strong style="color: green;">
+                        @if ($order->payment_provider === 'razorpay')
+                            Razorpay {{ ucfirst($order->payment_method ?? 'online') }}
+                        @else
+                            Payment confirmed
+                        @endif
+                    </strong>
+                @elseif ($order->order_status === 'refund_pending')
+                    <strong style="color: orange;">Refund pending</strong>
+                @elseif ($order->order_status === 'refund_required')
+                    <strong style="color: red;">Refund requires support</strong>
+                @elseif ($order->order_status === 'refunded')
+                    <strong style="color: green;">Refunded</strong>
                 @else
-                    <strong style="color: red;">Pending</strong>
+                    <strong style="color: red;">Payment pending</strong>
                 @endif
             </td>
         </tr>

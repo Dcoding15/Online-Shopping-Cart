@@ -5,11 +5,7 @@
     <title>Manage Users - Admin</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
     <p>
         <a href="{{ route('admin.dashboard') }}">← Admin Dashboard</a> |
         <a href="{{ route('admin.sellers.index') }}">Sellers</a> |
@@ -61,7 +57,6 @@
                 <th>Name</th>
                 <th>Phone</th>
                 <th>Role</th>
-                <th>Wallet Balance</th>
                 <th>Products</th>
                 <th>Orders</th>
                 <th>Actions</th>
@@ -82,11 +77,10 @@
                             <strong style="color: green;">Buyer</strong>
                         @endif
                     </td>
-                    <td align="right">₹{{ number_format($user->user_wallet_amount, 2) }}</td>
                     <td align="center">{{ $user->products_count }}</td>
                     <td align="center">{{ $user->orders_count }}</td>
                     <td align="center">
-                        <a href="{{ route('admin.users.edit', $user->user_id) }}">Edit Role/Wallet</a>
+                        <a href="{{ route('admin.users.edit', $user->user_id) }}">Edit User</a>
                         @if ($user->user_id !== auth()->id())
                             &nbsp;|&nbsp;
                             <form action="{{ route('admin.users.destroy', $user->user_id) }}" method="POST" style="display:inline;">

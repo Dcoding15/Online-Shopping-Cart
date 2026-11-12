@@ -5,14 +5,13 @@
     <title>Shopping Cart</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
-    <p>
-        <a href="{{ route('dashboard') }}">My Dashboard</a>
-    </p>
+    @include('partials.app-header')
+    <fieldset class="page-navigation">
+        <legend>Buyer navigation</legend>
+        <nav class="page-nav" aria-label="Buyer navigation">
+            <a href="{{ route('dashboard') }}">My Dashboard</a>
+        </nav>
+    </fieldset>
 
     <hr>
 
@@ -103,10 +102,6 @@
             <tr>
                 <th align="left">Cart Grand Total:</th>
                 <td align="right"><strong>₹{{ number_format($totalPrice, 2) }}</strong></td>
-            </tr>
-            <tr>
-                <th align="left">Your Wallet Balance:</th>
-                <td align="right">₹{{ number_format(auth()->user()->user_wallet_amount, 2) }}</td>
             </tr>
         </table>
 

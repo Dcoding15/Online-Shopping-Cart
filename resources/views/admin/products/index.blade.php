@@ -5,11 +5,7 @@
     <title>Platform Products - Admin Oversight</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
 
     <p>
         <a href="{{ route('admin.dashboard') }}">← Admin Dashboard</a> |

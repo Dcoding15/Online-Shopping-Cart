@@ -100,12 +100,18 @@ img { max-width: 100%; }
     border-bottom: 1px solid var(--line);
 }
 
+.site-header form { margin: 0; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 19px; font-weight: 700; text-decoration: none; }
 .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 6px; color: var(--green-dark); background: var(--lime); font: 22px Georgia, serif; }
 .site-nav { display: flex; align-items: center; justify-content: flex-end; gap: 18px; color: var(--muted); font-size: 13px; }
 .site-nav a { font-weight: 600; text-decoration: none; }
 .site-nav form { margin: 0; }
 .site-nav button { min-height: 34px; padding: 6px 12px; font-size: 12px; }
+.site-nav-fieldset { margin: 0 auto 20px; padding: 6px 12px 8px; }
+.page-navigation { margin: 0 0 20px; padding: 8px 14px 12px; }
+.page-navigation ul { margin: 0; padding-left: 20px; }
+.page-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.page-nav form { margin: 0; }
 .storefront-main, .product-detail { max-width: 1180px; margin: 0 auto; }
 
 .market-hero {

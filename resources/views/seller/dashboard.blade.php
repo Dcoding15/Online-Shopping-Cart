@@ -6,19 +6,21 @@
 </head>
 <body>
 
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
+    @include('partials.app-header')
     <h1>Seller Dashboard</h1>
 
     <p>Welcome, {{ auth()->user()->user_name ?? 'Seller' }}</p>
 
-    <p>
-        <a href="{{ route('seller.products') }}">My Products</a> |
-        <a href="{{ route('seller.products.create') }}">Add Product</a>
-    </p>
+    <fieldset class="page-navigation">
+        <legend>Seller navigation</legend>
+        <nav class="page-nav" aria-label="Seller navigation">
+            <a href="{{ route('seller.products') }}">My Products</a>
+            <a href="{{ route('seller.products.create') }}">Add Product</a>
+        </nav>
+    </fieldset>
 
     <h2>Overview</h2>
     <p>Total Products: {{ $products->count() }}</p>
-    <p>Wallet Balance: ₹{{ number_format(auth()->user()->user_wallet_amount ?? 0, 2) }}</p>
 
     <h2>Recent Products</h2>
     @if($products->count() > 0)

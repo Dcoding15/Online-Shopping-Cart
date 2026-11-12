@@ -35,7 +35,7 @@ Run one test file:
 
 Run a specific test by name:
 
-    php artisan test --compact --filter="insufficient funds"
+    php artisan test --compact --filter="invalid Razorpay signatures"
 
 Run the unit test suite only:
 
@@ -45,9 +45,8 @@ Run the feature test suite only:
 
     php artisan test --compact tests\Feature
 
-The most recently verified full run completed with 40 tests and 162
-assertions passing. Test results can change as the code or environment
-changes; rerun the suite before relying on this status.
+Test results can change as the code or environment changes; run the suite
+before relying on its status.
 
 
 3. FEATURE TEST COVERAGE
@@ -79,12 +78,12 @@ CART - tests\Feature\CartTest.php
 
 CHECKOUT AND ORDERS - tests\Feature\OrderTest.php
 
-- Checks checkout summary, shipping address, and buyer wallet balance.
+- Checks checkout summary and the Razorpay card/UPI payment options.
 - Checks checkout redirects when the cart is empty.
-- Checks a successful purchase deducts the buyer wallet, credits the seller,
-  reduces stock, creates an order and item, and clears the buyer's cart.
-- Checks insufficient wallet balance is rejected without creating an order
-  for that buyer or changing the buyer wallet/product stock.
+- Checks a verified Razorpay payment marks the order paid, stores the method,
+  reduces stock, creates order items, and clears the buyer's cart.
+- Checks invalid signatures do not fulfill an order and missing Razorpay
+  credentials are reported without creating an order.
 - Checks a buyer can view their invoice.
 - Checks a buyer cannot view another buyer's invoice.
 
@@ -102,7 +101,7 @@ ADMIN - tests\Feature\AdminTest.php
 - Checks buyers and sellers are forbidden from admin routes and guests are
   redirected to login.
 - Checks filtering/searching the user list.
-- Checks an admin can update a user's role and wallet amount.
+- Checks an admin can update a user's role and details.
 - Checks an admin cannot delete their own account.
 - Checks platform order list and detailed order invoice.
 - Checks an admin can delete a product.
@@ -123,8 +122,8 @@ directly.
   and stock-status routes.
 - CartTest exercises buyer cart read/write routes, stock validation, and
   ownership checks.
-- OrderTest exercises checkout, order submission, order history/invoice,
-  wallet and stock effects, and buyer ownership checks.
+- OrderTest exercises checkout, Razorpay order creation/payment verification,
+  order history/invoice, stock effects, and buyer ownership checks.
 - SellerTest exercises admin seller-management routes and seller product
   pages, including guest/non-admin access restrictions.
 - AdminTest exercises admin dashboard, user, product, and order routes,
@@ -147,8 +146,8 @@ create their own records with factories or model creation.
 
 - Cart tests check persisted cart quantities, updates, removals, and that a
   different buyer cannot change another buyer's cart.
-- Order tests check order/order-item records and verify wallet, stock, and
-  cart state after successful or rejected checkout.
+- Order tests fake Razorpay API responses and verify payment signatures,
+  order/order-item records, stock, and cart state without contacting Razorpay.
 - Seller/admin tests check persisted user and product changes and deletion
   behavior.
 - DatabaseSeederTest checks seeded role counts, product counts, and seller
@@ -187,9 +186,9 @@ complete production or security audit. It does not comprehensively verify:
 - Every validation rule and malformed input for every form.
 - Image upload MIME/content edge cases and image retrieval for every format.
 - Every role and route combination for every endpoint.
-- Production deployment, email delivery, external payment processing, or
-  real-money settlement. Checkout currently uses the application's wallet.
-- Performance with a large dataset, queue workers, or multi-server sessions.
+- Production deployment, email delivery, real-money settlement, or live
+  Razorpay account behavior.
+- Real browser card/UPI/QR interactions, webhook handling, or live refunds.
 
 Add targeted tests when these behaviors become requirements or change.
 

@@ -5,13 +5,17 @@
     <title>Edit Product</title>
 </head>
 <body>
+    @include('partials.app-header')
 
     <h1>Edit Product</h1>
 
-    <p>
-        <a href="{{ route('seller.dashboard') }}">Dashboard</a> |
-        <a href="{{ route('seller.products') }}">My Products</a>
-    </p>
+    <fieldset class="page-navigation">
+        <legend>Seller navigation</legend>
+        <nav class="page-nav" aria-label="Seller navigation">
+            <a href="{{ route('seller.dashboard') }}">Dashboard</a>
+            <a href="{{ route('seller.products') }}">My Products</a>
+        </nav>
+    </fieldset>
 
     @if ($errors->any())
         <div style="color: red;">

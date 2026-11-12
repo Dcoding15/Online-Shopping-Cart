@@ -119,6 +119,32 @@ test('buyer can view single product details', function () {
     $response->assertSee('Add to Cart');
 });
 
+test('seller browsing products does not show buyer cart or order routes', function () {
+    $seller = User::factory()->seller()->create();
+
+    $product = Product::create([
+        'product_name' => 'Seller Browsing Product',
+        'user_id' => $seller->user_id,
+        'product_available_quantity' => 5,
+        'product_price' => 100.00,
+        'product_type' => 'Laptops',
+        'product_category' => 'Electronics',
+    ]);
+
+    $catalog = $this->actingAs($seller)->get(route('products.index'));
+
+    $catalog->assertStatus(200);
+    $catalog->assertDontSee(route('cart.index'));
+    $catalog->assertDontSee(route('orders.index'));
+
+    $details = $this->get(route('products.show', $product->product_id));
+
+    $details->assertStatus(200);
+    $details->assertDontSee(route('cart.index'));
+    $details->assertDontSee(route('cart.store'));
+    $details->assertDontSee('Add to Cart');
+});
+
 test('out of stock product shows out of stock notice', function () {
     $seller = User::factory()->seller()->create();
 

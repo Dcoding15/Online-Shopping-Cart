@@ -13,8 +13,8 @@ test('registration creates an account using its phone number without an email', 
         'user_name' => 'Registered Buyer',
         'phone_no' => $phone,
         'user_type' => 'buyer',
-        'password' => 'secret123',
-        'password_confirmation' => 'secret123',
+        'password' => 'StrongPass123!',
+        'password_confirmation' => 'StrongPass123!',
     ]);
 
     $response->assertRedirect('/dashboard');
@@ -26,6 +26,20 @@ test('registration creates an account using its phone number without an email', 
     $this->assertAuthenticatedAs(User::where('phone_no', $phone)->first());
 });
 
+test('registration rejects passwords without the required strength', function () {
+    $phone = '999'.rand(1000000, 9999999);
+
+    $this->post(route('register'), [
+        'user_name' => 'Weak Password Buyer',
+        'phone_no' => $phone,
+        'user_type' => 'buyer',
+        'password' => 'secret123',
+        'password_confirmation' => 'secret123',
+    ])->assertSessionHasErrors('password');
+
+    $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
+});
+
 test('registration displays and serves an uploaded profile picture on the dashboard', function () {
     $picture = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD7sAAAAASUVORK5CYII=');
     $phone = '999'.rand(1000000, 9999999);
@@ -33,8 +47,8 @@ test('registration displays and serves an uploaded profile picture on the dashbo
         'user_name' => 'Buyer with photo',
         'phone_no' => $phone,
         'user_type' => 'buyer',
-        'password' => 'secret123',
-        'password_confirmation' => 'secret123',
+        'password' => 'StrongPass123!',
+        'password_confirmation' => 'StrongPass123!',
         'user_profile_pic' => UploadedFile::fake()->createWithContent('avatar.png', $picture),
     ])->assertRedirect('/dashboard');
 

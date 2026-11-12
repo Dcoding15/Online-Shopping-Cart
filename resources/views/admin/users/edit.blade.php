@@ -5,11 +5,7 @@
     <title>Edit User #{{ $user->user_id }} - Admin</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
 
     <p>
         <a href="{{ route('admin.users.index') }}">← Back to Users List</a> |
@@ -52,9 +48,6 @@
 
         <label>Address:</label><br>
         <input type="text" name="user_addr" value="{{ old('user_addr', $user->user_addr) }}"><br><br>
-
-        <label>Wallet Balance (₹):</label><br>
-        <input type="number" step="0.01" min="0" name="user_wallet_amount" value="{{ old('user_wallet_amount', $user->user_wallet_amount) }}" required><br><br>
 
         <button type="submit">Save Changes</button>
     </form>

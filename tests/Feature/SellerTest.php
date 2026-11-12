@@ -34,8 +34,7 @@ test('can create a seller', function () {
         'phone_no' => $phone,
         'user_addr' => '123 Market Street',
         'date_of_birth' => '1990-05-15',
-        'user_wallet_amount' => '150.00',
-        'password' => 'secret123',
+        'password' => 'StrongPass123!',
     ]);
 
     $response->assertRedirect(route('seller.index'));
@@ -46,6 +45,19 @@ test('can create a seller', function () {
         'phone_no' => $phone,
         'user_type' => 'seller',
     ]);
+});
+
+test('seller creation rejects a weak password', function () {
+    $admin = User::factory()->admin()->create();
+    $phone = '999'.rand(1000000, 9999999);
+
+    $this->actingAs($admin)->post(route('seller.store'), [
+        'user_name' => 'Weak Password Seller',
+        'phone_no' => $phone,
+        'password' => 'secret123',
+    ])->assertSessionHasErrors('password');
+
+    $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
 });
 
 test('can update a seller', function () {
@@ -60,7 +72,6 @@ test('can update a seller', function () {
         'phone_no' => $seller->phone_no,
         'user_addr' => '456 Updated Ave',
         'date_of_birth' => '1992-01-01',
-        'user_wallet_amount' => '300.50',
     ]);
 
     $response->assertRedirect(route('seller.index'));
@@ -71,6 +82,17 @@ test('can update a seller', function () {
         'user_name' => 'Updated Seller Name',
         'user_addr' => '456 Updated Ave',
     ]);
+});
+
+test('seller password updates reject a weak password', function () {
+    $admin = User::factory()->admin()->create();
+    $seller = User::factory()->seller()->create();
+
+    $this->actingAs($admin)->put(route('seller.update', $seller->user_id), [
+        'user_name' => $seller->user_name,
+        'phone_no' => $seller->phone_no,
+        'password' => 'secret123',
+    ])->assertSessionHasErrors('password');
 });
 
 test('prevent seller deletion when seller owns products', function () {

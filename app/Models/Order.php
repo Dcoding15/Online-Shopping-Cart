@@ -24,6 +24,11 @@ class Order extends Model
         'order_total_amount',
         'order_status',
         'payment_confirmed',
+        'payment_provider',
+        'payment_method',
+        'razorpay_order_id',
+        'razorpay_payment_id',
+        'razorpay_refund_id',
         'shipping_address',
         'created_at',
     ];

@@ -5,6 +5,7 @@
     <title>Seller List</title>
 </head>
 <body>
+    @include('partials.app-header')
 
     <h1>Seller List</h1>
 
@@ -32,7 +33,6 @@
                     <th>Phone</th>
                     <th>Address</th>
                     <th>Date of Birth</th>
-                    <th>Wallet Balance</th>
                     <th>Total Products</th>
                     <th>Actions</th>
                 </tr>
@@ -45,7 +45,6 @@
                         <td>{{ $seller->phone_no }}</td>
                         <td>{{ $seller->user_addr ?? 'N/A' }}</td>
                         <td>{{ $seller->date_of_birth ? \Carbon\Carbon::parse($seller->date_of_birth)->format('Y-m-d') : 'N/A' }}</td>
-                        <td>{{ number_format($seller->user_wallet_amount, 2) }}</td>
                         <td>{{ $seller->products_count }}</td>
                         <td>
                             <a href="{{ route('seller.edit', $seller->user_id) }}">Edit</a>

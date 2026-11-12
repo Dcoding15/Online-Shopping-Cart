@@ -5,11 +5,7 @@
     <title>Platform Orders - Admin Oversight</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
 
     <p>
         <a href="{{ route('admin.dashboard') }}">← Admin Dashboard</a> |
@@ -49,7 +45,7 @@
                             @if ($order->order_status === 'paid')
                                 <span style="color: green; font-weight: bold;">Paid</span>
                             @else
-                                <span>{{ ucfirst($order->order_status) }}</span>
+                                <span>{{ ucwords(str_replace('_', ' ', $order->order_status)) }}</span>
                             @endif
                         </td>
                         <td align="center">

@@ -89,8 +89,11 @@
     <input
         type="password"
         name="password"
+        minlength="8"
+        autocomplete="new-password"
         required
     >
+    <small>Use at least 8 characters, including uppercase and lowercase letters, a number, and a symbol.</small>
 
     <br>
 

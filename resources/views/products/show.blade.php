@@ -5,18 +5,21 @@
     <link rel="stylesheet" href="{{ asset('css/market.css') }}">
 </head>
 <body class="storefront">
-    <header class="site-header">
-        <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
+    @include('partials.app-header')
+    <fieldset class="site-nav-fieldset">
+        <legend>Main navigation</legend>
         <nav class="site-nav" aria-label="Main navigation">
             <a href="{{ route('products.index') }}">Browse</a>
         @auth
             <a href="{{ route('dashboard') }}">Dashboard</a>
-            <a href="{{ route('cart.index') }}">Cart ({{ auth()->user()->user_cart_quantity }})</a>
+            @if(auth()->user()->isBuyer())
+                <a href="{{ route('cart.index') }}">Cart ({{ auth()->user()->user_cart_quantity }})</a>
+            @endif
         @else
             <a href="{{ route('login') }}">Login</a>
         @endauth
         </nav>
-    </header>
+    </fieldset>
 
     <main class="product-detail">
         <p class="breadcrumbs"><a href="{{ route('products.index') }}">Browse products</a> / {{ $product->product_category }}</p>
@@ -49,15 +52,17 @@
                 <h1>{{ $product->product_name }}</h1>
                 <p>{{ $product->product_type }} <span aria-hidden="true">·</span> Sold by {{ $product->seller->user_name ?? 'N/A' }}</p>
                 <p class="detail-price">₹{{ number_format($product->product_price, 2) }}</p>
-                @if ($product->product_available_quantity > 0)
-                    <form class="buy-form" method="POST" action="{{ route('cart.store') }}">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->product_id }}">
-                        <label for="quantity">Quantity<input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ $product->product_available_quantity }}"></label>
-                        <button type="submit">Add to Cart</button>
-                    </form>
-                @else
-                    <p class="notice-error">This product is currently out of stock and cannot be added to the cart.</p>
+                @if (!auth()->check() || auth()->user()->isBuyer())
+                    @if ($product->product_available_quantity > 0)
+                        <form class="buy-form" method="POST" action="{{ route('cart.store') }}">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                            <label for="quantity">Quantity<input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ $product->product_available_quantity }}"></label>
+                            <button type="submit">Add to Cart</button>
+                        </form>
+                    @else
+                        <p class="notice-error">This product is currently out of stock and cannot be added to the cart.</p>
+                    @endif
                 @endif
                 <table class="detail-table"><tbody>
                     <tr><th scope="row">Category</th><td>{{ $product->product_category }}</td></tr>

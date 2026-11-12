@@ -40,18 +40,16 @@ test('admin can view and filter user list', function () {
     $response->assertSee('Target Seller AdminTest');
 });
 
-test('admin can update user role and wallet amount', function () {
+test('admin can update user role and details', function () {
     $admin = User::factory()->admin()->create();
     $targetUser = User::factory()->create([
         'user_type' => 'buyer',
-        'user_wallet_amount' => 50.00,
     ]);
 
     $response = $this->actingAs($admin)->put(route('admin.users.update', $targetUser->user_id), [
         'user_name' => 'Promoted User',
         'phone_no' => $targetUser->phone_no,
         'user_type' => 'seller',
-        'user_wallet_amount' => 500.00,
     ]);
 
     $response->assertRedirect(route('admin.users.index'));
@@ -59,8 +57,7 @@ test('admin can update user role and wallet amount', function () {
 
     $targetUser->refresh();
     expect($targetUser->user_name)->toBe('Promoted User')
-        ->and($targetUser->user_type)->toBe('seller')
-        ->and((float) $targetUser->user_wallet_amount)->toBe(500.0);
+        ->and($targetUser->user_type)->toBe('seller');
 });
 
 test('admin cannot delete their own account', function () {

@@ -5,17 +5,16 @@
     <title>Order Invoice #{{ $order->order_id }}</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
 
-    <p>
-        <a href="{{ route('orders.index') }}">← Back to Orders</a> |
-        <a href="{{ route('products.index') }}">Browse Catalog</a> |
-        <a href="{{ route('dashboard') }}">My Dashboard</a>
-    </p>
+    <fieldset class="page-navigation">
+        <legend>Buyer navigation</legend>
+        <nav class="page-nav" aria-label="Buyer navigation">
+            <a href="{{ route('orders.index') }}">← Back to Orders</a>
+            <a href="{{ route('products.index') }}">Browse Catalog</a>
+            <a href="{{ route('dashboard') }}">My Dashboard</a>
+        </nav>
+    </fieldset>
 
     <hr>
 
@@ -45,16 +44,28 @@
         <tr>
             <th align="left">Order Status:</th>
             <td>
-                <span style="color: green; font-weight: bold;">{{ ucfirst($order->order_status) }}</span>
+                <span style="color: green; font-weight: bold;">{{ ucwords(str_replace('_', ' ', $order->order_status)) }}</span>
             </td>
         </tr>
         <tr>
             <th align="left">Payment Status:</th>
             <td>
                 @if ($order->payment_confirmed)
-                    <span style="color: green; font-weight: bold;">Paid via User Wallet</span>
+                    <span style="color: green; font-weight: bold;">
+                        @if ($order->payment_provider === 'razorpay')
+                            Paid via Razorpay ({{ ucfirst($order->payment_method ?? 'Online') }})
+                        @else
+                            Payment confirmed
+                        @endif
+                    </span>
+                @elseif ($order->order_status === 'refund_pending')
+                    <span style="color: orange;">Refund pending</span>
+                @elseif ($order->order_status === 'refund_required')
+                    <span style="color: red;">Refund requires support</span>
+                @elseif ($order->order_status === 'refunded')
+                    <span style="color: green;">Refunded</span>
                 @else
-                    <span style="color: red;">Unconfirmed</span>
+                    <span style="color: red;">Payment pending</span>
                 @endif
             </td>
         </tr>

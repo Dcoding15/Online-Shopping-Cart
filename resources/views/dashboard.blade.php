@@ -5,11 +5,7 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <a class="brand" href="{{ route('products.index') }}"><span class="brand-mark" aria-hidden="true">m</span><span>Market</span></a>
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" style="margin-left: 89%;">Logout</button>
-    </form>
+    @include('partials.app-header')
     <!-- <h1>User Dashboard</h1> -->
 
     <section class="dashboard-profile" aria-label="Profile">
@@ -43,39 +39,39 @@
                     <th>Address:</th>
                     <td>{{ $user->user_addr ?? 'Not set' }}</td>
                 </tr>
-                <tr>
-                    <th>Wallet Balance:</th>
-                    <td>₹{{ number_format($user->user_wallet_amount, 2) }}</td>
-                </tr>
             </table>
         </div>
     </section>
 
     <br>
 
-    <h3>Navigation</h3>
-    <ul>
-        <li><a href="{{ route('cart.index') }}">My Shopping Cart ({{ $user->user_cart_quantity }})</a></li>
-        <li><a href="{{ route('orders.index') }}">My Order History</a></li>
+    <fieldset class="page-navigation">
+        <legend>Navigation</legend>
+        <nav aria-label="Account navigation">
+            <ul>
+                @if ($user->isBuyer())
+                    <li><a href="{{ route('products.index') }}">Browse Products</a></li>
+                    <li><a href="{{ route('cart.index') }}">My Shopping Cart ({{ $user->user_cart_quantity ?? 0 }})</a></li>
+                    <li><a href="{{ route('orders.index') }}">My Order History</a></li>
+                @endif
 
-        @if ($user->isSeller())
-            <li><a href="{{ route('seller.dashboard') }}">Seller Dashboard</a></li>
-            <li><a href="{{ route('seller.products') }}">Manage My Products</a></li>
-            <li><a href="{{ route('seller.products.create') }}">Add New Product</a></li>
-        @endif
+                @if ($user->isSeller())
+                    <li><a href="{{ route('seller.dashboard') }}">Seller Dashboard</a></li>
+                    <li><a href="{{ route('seller.products') }}">Manage My Products</a></li>
+                    <li><a href="{{ route('seller.products.create') }}">Add New Product</a></li>
+                @endif
 
-        @if ($user->isAdmin())
-            <li><strong><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></strong></li>
-            <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li>
-            <li><a href="{{ route('admin.products.index') }}">Manage Products</a></li>
-            <li><a href="{{ route('admin.orders.index') }}">Manage Orders</a></li>
-        @endif
-    </ul>
-
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit">Logout</button>
-    </form>
+                @if ($user->isAdmin())
+                    <li><a href="{{ route('cart.index') }}">My Shopping Cart ({{ $user->user_cart_quantity ?? 0 }})</a></li>
+                    <li><a href="{{ route('orders.index') }}">My Order History</a></li>
+                    <li><strong><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></strong></li>
+                    <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li>
+                    <li><a href="{{ route('admin.products.index') }}">Manage Products</a></li>
+                    <li><a href="{{ route('admin.orders.index') }}">Manage Orders</a></li>
+                @endif
+            </ul>
+        </nav>
+    </fieldset>
 
 </body>
 </html>

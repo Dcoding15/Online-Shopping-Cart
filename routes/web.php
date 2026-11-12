@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
         */
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
         Route::post('/checkout', [OrderController::class, 'store'])->name('orders.store');
+        Route::post('/checkout/verify', [OrderController::class, 'verifyPayment'])->name('orders.verify');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     });

@@ -127,10 +127,7 @@ test('adding same product increments existing cart item quantity', function () {
 });
 
 test('buyer can view cart and totals', function () {
-    $buyer = User::factory()->create([
-        'user_type' => 'buyer',
-        'user_wallet_amount' => 500.00,
-    ]);
+    $buyer = User::factory()->create(['user_type' => 'buyer']);
     $seller = User::factory()->seller()->create();
 
     $product = Product::create([
@@ -155,7 +152,7 @@ test('buyer can view cart and totals', function () {
     $response->assertStatus(200);
     $response->assertSee('Wireless Keyboard');
     $response->assertSee('₹90.00'); // 2 * 45
-    $response->assertSee('₹500.00'); // Wallet
+    $response->assertDontSee('Wallet');
 });
 
 test('buyer can update cart item quantity', function () {
