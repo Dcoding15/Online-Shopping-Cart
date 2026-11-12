@@ -9,6 +9,7 @@ A Laravel-based multi-seller marketplace where visitors can browse products, buy
 - [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
 - [Roles and Access](#roles-and-access)
+- [Razorpay Payments](#razorpay-payments)
 - [Database Overview](#database-overview)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
@@ -91,6 +92,35 @@ Browser
 Checkout creates a pending local order and Razorpay payment order. The server verifies Razorpay's signature and confirms the captured amount before decrementing stock and clearing the buyer's cart. If stock runs out after payment, the application requests a refund instead of fulfilling the order.
 
 Razorpay credentials are required for checkout. Use test-mode credentials during development. Payment methods shown in Checkout depend on the methods enabled for the Razorpay account.
+
+## Razorpay Payments
+
+The application uses Razorpay Standard Checkout. Customers can pay by card or UPI when those payment methods are enabled for the merchant account. UPI QR availability depends on Razorpay account settings and the checkout flow.
+
+### Configure credentials
+
+1. Generate API keys in the Razorpay Dashboard's **Test Mode**.
+2. Set the keys in the project-root `.env` file:
+
+   ```dotenv
+   RAZORPAY_KEY_ID=rzp_test_your_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_test_key_secret
+   ```
+
+3. If Laravel configuration is cached, run `php artisan config:clear`, then restart the development server.
+4. Confirm UPI is enabled in the Razorpay Dashboard if it is not shown in Checkout.
+
+Keep the secret key private and out of source control. For production, complete Razorpay account activation and configure Live Mode keys in the production environment.
+
+### Payment flow
+
+The server creates a pending local order and a matching Razorpay order in INR. Razorpay Checkout collects the payment details; the server then verifies the checkout signature and fetches the payment from Razorpay to confirm its order, amount, currency, and captured status. Only a verified captured payment fulfills the order, reduces stock, and clears the matching cart items. If stock is no longer available after payment, the application requests a refund instead of fulfilling the order.
+
+### Testing and troubleshooting
+
+Use Test Mode keys and Razorpay's test payment details to complete a checkout without charging a real payment method. Creating an API test order verifies the credentials and connectivity, but does not test the browser checkout or a completed payment.
+
+The application does not currently use payment webhooks. If a customer closes the browser before the checkout response is verified, an order can remain pending and may need manual reconciliation. If PHP reports `cURL error 60`, configure a trusted CA bundle for the active PHP installation; do not disable TLS certificate verification.
 
 ## Roles and Access
 
