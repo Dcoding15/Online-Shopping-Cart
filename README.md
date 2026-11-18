@@ -8,6 +8,8 @@ A Laravel-based multi-seller marketplace where visitors can browse products, buy
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
+- [Application Logic Guide](#application-logic-guide)
+- [Website Flowcharts](#website-flowcharts)
 - [Roles and Access](#roles-and-access)
 - [Razorpay Payments](#razorpay-payments)
 - [Database Overview](#database-overview)
@@ -293,3 +295,321 @@ php artisan migrate:status
 - **Payments:** Checkout requires Razorpay test/live credentials. Card and UPI options are offered by Razorpay Checkout according to account settings; no seller payout integration is included.
 - **Seeder behavior:** Seeders add records and are not idempotent by default.
 - **Production readiness:** Before deployment, configure secure production environment settings, review concurrency error handling, validate all incoming values, and run tests against a properly configured PostgreSQL environment.
+
+## Application Logic Guide
+
+This section maps the website's main behavior to the source files where its logic is implemented.
+
+### Request flow
+
+```text
+Browser request
+  -> routes/web.php
+  -> authentication / role middleware
+  -> app/Http/Controllers/
+  -> app/Models/ and database/
+  -> resources/views/
+  -> Browser response
+```
+
+### Main logic locations
+
+| Feature | Entry point | Logic |
+|---|---|---|
+| Routes and access control | `routes/web.php` | Maps URLs to controllers and groups routes by authentication, buyer, seller, and admin roles. |
+| Login and registration | `app/Http/Controllers/AuthController.php` | Validates new accounts, hashes passwords, authenticates users, and logs users out. |
+| Profile editing | `app/Http/Controllers/CustomerController.php` | Shows and updates the signed-in user's name, phone, address, birth date, password, and profile picture. |
+| Product catalogue | `app/Http/Controllers/ProductController.php` | Searches, filters, sorts, and displays products and product pictures. |
+| Cart | `app/Http/Controllers/CartController.php` | Adds, updates, removes, or clears the current buyer's cart; checks stock and prevents sellers from buying their own products. |
+| Checkout and payment | `app/Http/Controllers/OrderController.php` | Creates pending orders, starts Razorpay checkout, verifies payment, checks stock, fulfills orders, and requests refunds when stock is unavailable. |
+| Seller operations | `app/Http/Controllers/SellerController.php` | Manages sellers and limits seller product changes to products they own. |
+| Administrator operations | `app/Http/Controllers/AdminController.php` | Manages users, sellers, products, and orders; blocks deletion of purchased products. |
+| Role checks | `app/Http/Middleware/` | Restricts buyer-, seller-, and admin-only routes. Middleware aliases are configured in `bootstrap/app.php`. |
+
+### Accounts and profiles
+
+1. Registration and login are routed through `AuthController`.
+2. Registration permits buyer and seller roles; admin accounts are not created through public registration.
+3. Signed-in users can edit their profile through the profile routes.
+4. Server validation restricts names to letters, phone numbers to exactly 10 digits, and addresses to letters, digits, spaces, commas, hyphens, and parentheses.
+5. Passwords are hashed before saving. Profile pictures are validated and served through an authenticated route.
+
+Related files:
+
+- Routes: `routes/web.php`
+- Profile page: `resources/views/profile/edit.blade.php`
+- Dashboard link: `resources/views/dashboard.blade.php`
+- Live input filters: `public/js/name-validation.js` and `public/js/address-validation.js`
+
+### Shopping and payment logic
+
+1. Public catalogue requests are handled by `ProductController`.
+2. A buyer's cart is scoped to the signed-in user in `CartController`.
+3. Checkout validates the shipping address, locks cart and product rows, verifies stock, and creates a pending order with purchase-time item snapshots.
+4. The server creates a Razorpay order. After checkout, it verifies the signature and payment status before marking an order as paid.
+5. Successful fulfillment reduces stock and clears matching cart quantities. If stock is no longer available, the order is marked for refund instead of fulfillment.
+
+Related files:
+
+- Cart: `resources/views/cart/index.blade.php`
+- Checkout: `resources/views/orders/checkout.blade.php`
+- Order history and details: `resources/views/orders/index.blade.php` and `resources/views/orders/show.blade.php`
+- Payment configuration: `config/services.php`
+
+### Product management logic
+
+- Sellers create and edit product details in `SellerController`; product metadata is stored as JSON and displayed as specification tags.
+- Admin product deletion checks paid/purchased order items and refuses deletion if a purchase exists.
+- Product and order relationships are defined in `app/Models/Product.php`, `app/Models/Order.php`, and `app/Models/OrderItem.php`.
+- Product specifications are rendered in `resources/views/products/show.blade.php`.
+
+### Data and seed logic
+
+| Data | Source |
+|---|---|
+| Database schema | `database/migrations/` |
+| User model and role helpers | `app/Models/User.php` |
+| Product model and categories/types | `app/Models/Product.php` |
+| Generated user data | `database/factories/UserFactory.php` |
+| Generated product data, including Indian brand metadata | `database/factories/ProductFactory.php` |
+| User seed counts | `database/seeders/UserSeeder.php` |
+| Product seed count | `database/seeders/ProductSeeder.php` |
+| Seeder order | `database/seeders/DatabaseSeeder.php` |
+
+Run all seeders with `php artisan db:seed`, or just product seeds with `php artisan db:seed --class=ProductSeeder`. Seeding is additive.
+
+### Tests
+
+Feature tests for authentication, profile updates, products, cart, checkout, seller tools, and admin actions live in `tests/Feature/`.
+
+```powershell
+php artisan test
+```
+
+## Website Flowcharts
+
+The following Mermaid diagrams visualize the visitor, buyer, seller, administrator, account validation, payment, and database flows. Markdown viewers with Mermaid support will render them as diagrams.
+
+### Overall website flow
+
+```mermaid
+flowchart TD
+    A([Visitor opens website]) --> B{Has account?}
+    B -->|No| C[Register]
+    C --> D{Select role}
+    D -->|Buyer| E[Create buyer account]
+    D -->|Seller| F[Create seller account]
+    E --> G[Login automatically]
+    F --> G
+    B -->|Yes| H[Login]
+    H --> I{Credentials valid?}
+    I -->|No| J[Show login error]
+    J --> H
+    I -->|Yes| G
+    G --> K{Authenticated role}
+    K -->|Buyer| L[Buyer dashboard]
+    K -->|Seller| M[Seller dashboard]
+    K -->|Administrator| N[Admin dashboard]
+    A --> O[Browse public catalogue]
+    O --> P[Search and filter products]
+    P --> Q[View product details]
+    Q --> R{Signed in as buyer?}
+    R -->|Yes| S[Add product to cart]
+    R -->|No| H
+    L --> O
+    L --> T[View cart]
+    T --> U[Update or remove items]
+    U --> V[Proceed to checkout]
+    V --> W[Enter shipping address]
+    W --> X[Create Razorpay order]
+    X --> Y{Payment successful?}
+    Y -->|No| Z[Return to checkout]
+    Y -->|Yes| AA[Verify payment signature]
+    AA --> AB{Enough stock?}
+    AB -->|Yes| AC[Confirm order]
+    AC --> AD[Reduce stock]
+    AD --> AE[Clear cart]
+    AE --> AF[View order invoice]
+    AB -->|No| AG[Request payment refund]
+    AG --> AH[Do not fulfill order]
+    M --> AI[View own products]
+    AI --> AJ[Create product]
+    AI --> AK[Edit product]
+    AI --> AL[Delete own unpurchased product]
+    N --> AM[Manage users]
+    N --> AN[Manage sellers]
+    N --> AO[Manage products]
+    N --> AP[View marketplace orders]
+    AM --> AQ[Edit or delete user]
+    AN --> AR[Create, edit, or delete seller]
+    AO --> AS{Product purchased?}
+    AS -->|Yes| AT[Block deletion]
+    AS -->|No| AU[Delete product]
+    AP --> AV[View order details]
+```
+
+### Account validation flow
+
+```mermaid
+flowchart LR
+    A[Registration form] --> B[Enter name]
+    B --> C{Name contains only A-Z or a-z?}
+    C -->|No| D[Remove invalid characters / show error]
+    C -->|Yes| E[Enter 10-digit phone number]
+    E --> F{Exactly 10 digits?}
+    F -->|No| G[Show phone validation error]
+    F -->|Yes| H[Enter address]
+    H --> I{Allowed address characters only?}
+    I -->|No| J[Remove invalid characters / show error]
+    I -->|Yes| K[Enter strong password]
+    K --> L{Password meets strength rules?}
+    L -->|No| M[Show password error]
+    L -->|Yes| N[Confirm password]
+    N --> O{Passwords match?}
+    O -->|No| P[Show confirmation error]
+    O -->|Yes| Q[Create account]
+    Q --> R[Hash password]
+    R --> S[Log in user]
+```
+
+### Buyer payment flow
+
+```mermaid
+sequenceDiagram
+    actor Buyer
+    participant Browser
+    participant Laravel
+    participant Database
+    participant Razorpay
+
+    Buyer->>Browser: Browse catalogue
+    Browser->>Laravel: Search or view product
+    Laravel->>Database: Fetch products
+    Database-->>Laravel: Product data
+    Laravel-->>Browser: Render catalogue
+    Buyer->>Browser: Add product
+    Browser->>Laravel: Add to cart
+    Laravel->>Database: Save cart item
+    Database-->>Laravel: Cart updated
+    Buyer->>Browser: Proceed to checkout
+    Browser->>Laravel: Submit shipping address
+    Laravel->>Database: Create pending order and order items
+    Laravel->>Razorpay: Create payment order
+    Razorpay-->>Buyer: Open Checkout
+    Buyer->>Razorpay: Complete payment
+    Razorpay-->>Browser: Payment response
+    Browser->>Laravel: Send signature and payment IDs
+    Laravel->>Razorpay: Verify payment and fetch details
+    Razorpay-->>Laravel: Captured payment details
+    Laravel->>Database: Verify stock
+    alt Stock available
+        Laravel->>Database: Mark order paid
+        Laravel->>Database: Reduce stock
+        Laravel->>Database: Clear cart
+        Laravel-->>Browser: Redirect to invoice
+    else Stock unavailable
+        Laravel->>Razorpay: Request refund
+        Laravel->>Database: Keep order from fulfillment
+    end
+```
+
+### Seller product management flow
+
+```mermaid
+flowchart TD
+    A[Seller logs in] --> B[Open Seller Dashboard]
+    B --> C[Open My Products]
+    C --> D{Choose action}
+    D -->|Create| E[Enter product details]
+    E --> F[Upload optional picture]
+    F --> G[Save product]
+    G --> H[Product appears in catalogue]
+    D -->|Edit| I[Open owned product]
+    I --> J[Update details]
+    J --> K[Save changes]
+    D -->|Delete| L{Product is owned by seller?}
+    L -->|No| M[Reject request]
+    L -->|Yes| N{Product has been purchased?}
+    N -->|Yes| O[Block seller deletion]
+    N -->|No| P[Delete product]
+```
+
+### Administrator management flow
+
+```mermaid
+flowchart TD
+    A[Administrator logs in] --> B[Open Admin Dashboard]
+    B --> C{Select management area}
+    C -->|Users| D[View and search users]
+    D --> E[Edit user role or details]
+    D --> F{User owns active products?}
+    F -->|Yes| G[Block account deletion]
+    F -->|No| H[Delete account]
+    C -->|Sellers| I[View seller list]
+    I --> J[Create or edit seller]
+    I --> K{Seller owns products?}
+    K -->|Yes| L[Block seller deletion]
+    K -->|No| M[Delete seller]
+    C -->|Products| N[View platform products]
+    N --> O{Product has paid/purchased order?}
+    O -->|Yes| P[Disable Remove action]
+    P --> Q[Show purchased-product error]
+    O -->|No| R[Remove product]
+    C -->|Orders| S[View orders]
+    S --> T[Open order invoice]
+    T --> U[Review buyer, items, totals, and payment]
+```
+
+### Database relationship flow
+
+```mermaid
+erDiagram
+    USERS ||--o{ PRODUCTS : owns
+    USERS ||--o{ CART : has
+    USERS ||--o{ ORDERS : places
+    USERS ||--o{ ORDER_ITEMS : supplies
+    PRODUCTS ||--o{ CART : "may appear in"
+    PRODUCTS o|--o{ ORDER_ITEMS : "may be referenced by"
+    ORDERS ||--|{ ORDER_ITEMS : contains
+
+    USERS {
+        bigint user_id PK
+        string user_name
+        string phone_no
+        string user_addr
+        enum user_type
+        string password
+    }
+
+    PRODUCTS {
+        bigint product_id PK
+        bigint user_id FK
+        string product_name
+        decimal product_price
+        integer product_available_quantity
+    }
+
+    CART {
+        bigint cart_id PK
+        bigint user_id FK
+        bigint product_id FK
+        integer quantity
+    }
+
+    ORDERS {
+        bigint order_id PK
+        bigint user_id FK
+        decimal order_total_amount
+        string order_status
+        boolean payment_confirmed
+    }
+
+    ORDER_ITEMS {
+        bigint order_item_id PK
+        bigint order_id FK
+        bigint product_id FK
+        bigint seller_id FK
+        integer quantity
+        decimal unit_price
+    }
+```
