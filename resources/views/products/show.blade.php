@@ -77,7 +77,25 @@
             <p>{{ $product->product_description ?: 'No detailed description provided.' }}</p>
             @if (!empty($product->product_meta_data))
                 <h3>Specifications</h3>
-                <pre>{{ is_array($product->product_meta_data) ? json_encode($product->product_meta_data, JSON_PRETTY_PRINT) : $product->product_meta_data }}</pre>
+                <div class="specification-tags">
+                    @if (is_array($product->product_meta_data))
+                        @foreach ($product->product_meta_data as $name => $value)
+                            @if (is_scalar($value))
+                                <span class="specification-tag">
+                                    <strong>{{ ucfirst(str_replace('_', ' ', $name)) }}:</strong>
+                                    {{ $value }}
+                                </span>
+                            @else
+                                <span class="specification-tag">
+                                    <strong>{{ ucfirst(str_replace('_', ' ', $name)) }}:</strong>
+                                    {{ json_encode($value) }}
+                                </span>
+                            @endif
+                        @endforeach
+                    @else
+                        <span class="specification-tag">{{ $product->product_meta_data }}</span>
+                    @endif
+                </div>
             @endif
         </section>
     </main>

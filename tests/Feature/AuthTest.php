@@ -111,6 +111,49 @@ test('registration displays and serves an uploaded profile picture on the dashbo
         ->assertContent($picture);
 });
 
+test('authenticated users can edit their profile', function () {
+    $user = User::factory()->buyer()->create([
+        'user_name' => 'OriginalBuyer',
+        'phone_no' => '9991000001',
+        'user_addr' => '123 Old Street',
+    ]);
+
+    $response = $this->actingAs($user)->put(route('profile.update'), [
+        'user_name' => 'UpdatedBuyer',
+        'phone_no' => '9991000002',
+        'user_addr' => '456 New (Road)',
+        'date_of_birth' => '1995-06-15',
+    ]);
+
+    $response->assertRedirect(route('dashboard'));
+    $response->assertSessionHas('success');
+
+    $user->refresh();
+    expect($user->user_name)->toBe('UpdatedBuyer')
+        ->and($user->phone_no)->toBe('9991000002')
+        ->and($user->user_addr)->toBe('456 New (Road)')
+        ->and($user->date_of_birth?->format('Y-m-d'))->toBe('1995-06-15');
+});
+
+test('profile validation rejects invalid name and phone values', function () {
+    $user = User::factory()->buyer()->create([
+        'phone_no' => '9991000011',
+    ]);
+
+    $this->actingAs($user)->put(route('profile.update'), [
+        'user_name' => 'Invalid Name123',
+        'phone_no' => '123',
+        'user_addr' => 'Address @ Invalid',
+    ])
+        ->assertSessionHasErrors(['user_name', 'phone_no', 'user_addr']);
+
+    $this->assertDatabaseHas('users', [
+        'user_id' => $user->user_id,
+        'user_name' => $user->user_name,
+        'phone_no' => '9991000011',
+    ]);
+});
+
 test('dashboard shows a placeholder when no profile picture is uploaded', function () {
     $user = User::factory()->buyer()->create();
 

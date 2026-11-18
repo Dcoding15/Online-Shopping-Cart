@@ -26,6 +26,12 @@
         <div class="dashboard-profile-details">
             <h2>Welcome, {{ $user->user_name }}</h2>
 
+            @if (session('success'))
+                <p style="color: var(--green); font-weight: 600;">{{ session('success') }}</p>
+            @endif
+
+            <p><a href="{{ route('profile.edit') }}">Edit Profile</a></p>
+
             <table>
                 <tr>
                     <th>User Type:</th>

@@ -263,6 +263,9 @@ nav[role="navigation"][aria-label="Pagination Navigation"] svg { display: block;
 .detail-topline .stock-badge { position: static; }
 .detail-price { margin: 18px 0; color: var(--green-dark); font-size: 30px; font-weight: 700; }
 .detail-table { margin: 20px 0; }
+.specification-tags { display: flex; flex-wrap: wrap; gap: 9px; }
+.specification-tag { display: inline-flex; padding: 7px 11px; align-items: baseline; gap: 5px; border: 1px solid var(--line); border-radius: 999px; color: var(--green-dark); background: var(--surface-soft); font-size: 13px; }
+.specification-tag strong { color: var(--muted); font-size: 11px; text-transform: capitalize; }
 .buy-form { display: flex; margin: 22px 0; align-items: end; gap: 12px; }
 .buy-form label { display: grid; gap: 5px; }
 .buy-form input { width: 90px; }
@@ -276,6 +279,12 @@ nav[role="navigation"][aria-label="Pagination Navigation"] svg { display: block;
 .dashboard-avatar-caption { color: var(--muted); font-size: 12px; }
 .dashboard-profile-details { min-width: 0; }
 .dashboard-profile-details h2 { margin-top: 0; }
+
+.check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
 
 @media (max-width: 900px) {
     .catalog-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }

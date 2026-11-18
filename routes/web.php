@@ -65,6 +65,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile/edit', [CustomerController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
     Route::get('/profile/picture', [CustomerController::class, 'picture'])->name('profile.picture');
 
     /*
