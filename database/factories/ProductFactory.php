@@ -12,6 +12,33 @@ class ProductFactory extends Factory
 
     public function definition(): array
     {
+        $indianBrands = [
+            'Amul',
+            'Asian Paints',
+            'Bajaj',
+            'boAt',
+            'Britannia',
+            'Dabur',
+            'Fabindia',
+            'Godrej',
+            'Haldiram\'s',
+            'Havells',
+            'Himalaya',
+            'MTR',
+            'Mamaearth',
+            'Milton',
+            'Noise',
+            'Parle',
+            'Patanjali',
+            'Pigeon',
+            'Prestige',
+            'Royal Enfield',
+            'Tata',
+            'Titan',
+            'Wakefit',
+            'Wildcraft',
+        ];
+
         return [
             'product_name' => $this->faker->unique()->words(3, true),
             'user_id' => User::query()
@@ -25,7 +52,7 @@ class ProductFactory extends Factory
             'product_description' => $this->faker->paragraph(),
             'product_category' => $this->faker->randomElement(array_diff(Product::CATEGORIES, ['Others'])),
             'product_meta_data' => [
-                'brand' => $this->faker->company(),
+                'brand' => $this->faker->randomElement($indianBrands),
                 'color' => $this->faker->safeColorName(),
                 'size' => $this->faker->randomElement(['S', 'M', 'L', 'XL', 'One Size']),
                 'featured' => $this->faker->boolean(),
