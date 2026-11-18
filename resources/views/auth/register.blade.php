@@ -6,6 +6,7 @@
 </head>
 
 <body>
+@include('partials.app-header')
 <div style="max-width: 500px; margin: 0% auto;">
 <h1>Register</h1>
 
