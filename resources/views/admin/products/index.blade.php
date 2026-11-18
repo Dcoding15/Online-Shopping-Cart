@@ -82,6 +82,11 @@
                     <td align="center">
                         <a href="{{ route('products.show', $product->product_id) }}" target="_blank">View Details</a>
                         &nbsp;|&nbsp;
+                        @if (($product->purchased_order_items_count ?? 0) > 0)
+                            <button type="button" disabled title="This product has been purchased and cannot be deleted">
+                                Remove
+                            </button>
+                        @else
                         <form action="{{ route('admin.products.destroy', $product->product_id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
@@ -89,6 +94,7 @@
                                 Remove
                             </button>
                         </form>
+                        @endif
                     </td>
                 </tr>
             @endforeach

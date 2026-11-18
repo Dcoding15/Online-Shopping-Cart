@@ -84,10 +84,10 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'user_name' => 'required|string|max:100',
-            'phone_no' => 'required|string|max:150|unique:users,phone_no,'.$user->user_id.',user_id',
+            'user_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z]+$/'],
+            'phone_no' => ['required', 'string', 'size:10', 'regex:/^[0-9]{10}$/', 'unique:users,phone_no,'.$user->user_id.',user_id'],
             'user_type' => 'required|in:admin,seller,buyer',
-            'user_addr' => 'nullable|string|max:255',
+            'user_addr' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ,\-()]*$/'],
         ]);
 
         $user->update([
@@ -159,7 +159,15 @@ class AdminController extends Controller
      */
     public function products(Request $request)
     {
-        $query = Product::with('seller');
+        $query = Product::with('seller')
+            ->withCount([
+                'orderItems as purchased_order_items_count' => function ($query) {
+                    $query->whereHas('order', function ($orderQuery) {
+                        $orderQuery->where('payment_confirmed', true)
+                            ->orWhere('order_status', 'paid');
+                    });
+                },
+            ]);
 
         if ($request->filled('category')) {
             $query->where('product_category', $request->category);
@@ -183,6 +191,19 @@ class AdminController extends Controller
     {
         $product = Product::findOrFail($id);
         $productName = $product->product_name;
+
+        $hasPurchase = $product->orderItems()
+            ->whereHas('order', function ($query) {
+                $query->where('payment_confirmed', true)
+                    ->orWhere('order_status', 'paid');
+            })
+            ->exists();
+
+        if ($hasPurchase) {
+            return redirect()
+                ->route('admin.products.index')
+                ->with('error', "Cannot delete product '{$productName}' because it has been purchased.");
+        }
 
         $product->delete();
 

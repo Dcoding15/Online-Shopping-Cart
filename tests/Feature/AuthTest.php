@@ -10,7 +10,7 @@ test('registration creates an account using its phone number without an email', 
     $phone = '999'.rand(1000000, 9999999);
 
     $response = $this->post(route('register'), [
-        'user_name' => 'Registered Buyer',
+        'user_name' => 'RegisteredBuyer',
         'phone_no' => $phone,
         'user_type' => 'buyer',
         'password' => 'StrongPass123!',
@@ -19,7 +19,7 @@ test('registration creates an account using its phone number without an email', 
 
     $response->assertRedirect('/dashboard');
     $this->assertDatabaseHas('users', [
-        'user_name' => 'Registered Buyer',
+        'user_name' => 'RegisteredBuyer',
         'phone_no' => $phone,
         'user_type' => 'buyer',
     ]);
@@ -30,7 +30,7 @@ test('registration rejects passwords without the required strength', function ()
     $phone = '999'.rand(1000000, 9999999);
 
     $this->post(route('register'), [
-        'user_name' => 'Weak Password Buyer',
+        'user_name' => 'WeakPasswordBuyer',
         'phone_no' => $phone,
         'user_type' => 'buyer',
         'password' => 'secret123',
@@ -40,11 +40,54 @@ test('registration rejects passwords without the required strength', function ()
     $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
 });
 
+test('registration rejects names containing characters outside a-z and A-Z', function () {
+    $phone = '999'.rand(1000000, 9999999);
+
+    $this->post(route('register'), [
+        'user_name' => 'Buyer123!',
+        'phone_no' => $phone,
+        'user_type' => 'buyer',
+        'password' => 'StrongPass123!',
+        'password_confirmation' => 'StrongPass123!',
+    ])->assertSessionHasErrors('user_name');
+
+    $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
+});
+
+test('registration rejects phone numbers without exactly 10 digits', function () {
+    $phone = '12345';
+
+    $this->post(route('register'), [
+        'user_name' => 'Buyer',
+        'phone_no' => $phone,
+        'user_type' => 'buyer',
+        'password' => 'StrongPass123!',
+        'password_confirmation' => 'StrongPass123!',
+    ])->assertSessionHasErrors('phone_no');
+
+    $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
+});
+
+test('registration rejects addresses containing unsupported characters', function () {
+    $phone = '999'.rand(1000000, 9999999);
+
+    $this->post(route('register'), [
+        'user_name' => 'Buyer',
+        'phone_no' => $phone,
+        'user_addr' => '123 Main Street @ Downtown',
+        'user_type' => 'buyer',
+        'password' => 'StrongPass123!',
+        'password_confirmation' => 'StrongPass123!',
+    ])->assertSessionHasErrors('user_addr');
+
+    $this->assertDatabaseMissing('users', ['phone_no' => $phone]);
+});
+
 test('registration displays and serves an uploaded profile picture on the dashboard', function () {
     $picture = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD7sAAAAASUVORK5CYII=');
     $phone = '999'.rand(1000000, 9999999);
     $this->post(route('register'), [
-        'user_name' => 'Buyer with photo',
+        'user_name' => 'BuyerWithPhoto',
         'phone_no' => $phone,
         'user_type' => 'buyer',
         'password' => 'StrongPass123!',

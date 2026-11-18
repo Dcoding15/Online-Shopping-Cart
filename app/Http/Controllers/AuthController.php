@@ -23,9 +23,9 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'user_name' => 'required|string|max:100',
-            'phone_no' => 'required|string|max:150|unique:users,phone_no',
-            'user_addr' => 'nullable|string',
+            'user_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z]+$/'],
+            'phone_no' => ['required', 'string', 'size:10', 'regex:/^[0-9]{10}$/', 'unique:users,phone_no'],
+            'user_addr' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ,\-()]*$/'],
             'date_of_birth' => 'nullable|date',
             'user_type' => 'required|in:seller,buyer',
             'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
@@ -76,7 +76,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'phone_no' => 'required|string',
+            'phone_no' => ['required', 'string', 'size:10', 'regex:/^[0-9]{10}$/'],
             'password' => 'required',
         ]);
 

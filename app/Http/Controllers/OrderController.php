@@ -62,7 +62,7 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'shipping_address' => 'required|string|max:255',
+            'shipping_address' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ,\-()]+$/'],
         ]);
 
         $keyId = config('services.razorpay.key_id');

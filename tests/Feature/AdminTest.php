@@ -32,12 +32,12 @@ test('guest is redirected to login from admin routes', function () {
 
 test('admin can view and filter user list', function () {
     $admin = User::factory()->admin()->create();
-    $seller = User::factory()->seller()->create(['user_name' => 'Target Seller AdminTest']);
+    $seller = User::factory()->seller()->create(['user_name' => 'TargetSellerAdminTest']);
 
     $response = $this->actingAs($admin)->get(route('admin.users.index', ['type' => 'seller', 'search' => 'AdminTest']));
 
     $response->assertStatus(200);
-    $response->assertSee('Target Seller AdminTest');
+    $response->assertSee('TargetSellerAdminTest');
 });
 
 test('admin can update user role and details', function () {
@@ -47,7 +47,7 @@ test('admin can update user role and details', function () {
     ]);
 
     $response = $this->actingAs($admin)->put(route('admin.users.update', $targetUser->user_id), [
-        'user_name' => 'Promoted User',
+        'user_name' => 'PromotedUser',
         'phone_no' => $targetUser->phone_no,
         'user_type' => 'seller',
     ]);
@@ -56,7 +56,7 @@ test('admin can update user role and details', function () {
     $response->assertSessionHas('success');
 
     $targetUser->refresh();
-    expect($targetUser->user_name)->toBe('Promoted User')
+    expect($targetUser->user_name)->toBe('PromotedUser')
         ->and($targetUser->user_type)->toBe('seller');
 });
 
@@ -125,4 +125,45 @@ test('admin can delete a product', function () {
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('products', ['product_id' => $product->product_id]);
+});
+
+test('admin cannot delete a product that has been purchased', function () {
+    $admin = User::factory()->admin()->create();
+    $buyer = User::factory()->buyer()->create();
+    $seller = User::factory()->seller()->create();
+
+    $product = Product::create([
+        'product_name' => 'Purchased Product',
+        'user_id' => $seller->user_id,
+        'product_available_quantity' => 5,
+        'product_price' => 50.00,
+        'product_type' => 'Shoes',
+        'product_category' => 'Apparel & Accessories',
+    ]);
+
+    $order = Order::create([
+        'user_id' => $buyer->user_id,
+        'order_total_amount' => 50.00,
+        'order_status' => 'paid',
+        'payment_confirmed' => true,
+        'payment_provider' => 'razorpay',
+        'shipping_address' => '123 Test Street',
+        'created_at' => now(),
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->order_id,
+        'product_id' => $product->product_id,
+        'seller_id' => $seller->user_id,
+        'product_name' => $product->product_name,
+        'quantity' => 1,
+        'unit_price' => 50.00,
+        'subtotal' => 50.00,
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('admin.products.destroy', $product->product_id));
+
+    $response->assertRedirect(route('admin.products.index'));
+    $response->assertSessionHas('error');
+    $this->assertDatabaseHas('products', ['product_id' => $product->product_id]);
 });

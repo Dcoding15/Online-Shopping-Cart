@@ -45,9 +45,9 @@ class SellerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_name' => 'required|string|max:100',
-            'phone_no' => 'required|string|max:150|unique:users,phone_no',
-            'user_addr' => 'nullable|string|max:255',
+            'user_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z]+$/'],
+            'phone_no' => ['required', 'string', 'size:10', 'regex:/^[0-9]{10}$/', 'unique:users,phone_no'],
+            'user_addr' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ,\-()]*$/'],
             'date_of_birth' => 'nullable|date',
             'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
@@ -89,9 +89,9 @@ class SellerController extends Controller
             ->firstOrFail();
 
         $validated = $request->validate([
-            'user_name' => 'required|string|max:100',
-            'phone_no' => 'required|string|max:150|unique:users,phone_no,'.$seller->user_id.',user_id',
-            'user_addr' => 'nullable|string|max:255',
+            'user_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z]+$/'],
+            'phone_no' => ['required', 'string', 'size:10', 'regex:/^[0-9]{10}$/', 'unique:users,phone_no,'.$seller->user_id.',user_id'],
+            'user_addr' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ,\-()]*$/'],
             'date_of_birth' => 'nullable|date',
             'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);

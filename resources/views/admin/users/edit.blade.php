@@ -34,10 +34,10 @@
         <input type="text" value="{{ $user->user_id }}" disabled><br><br>
 
         <label>Name:</label><br>
-        <input type="text" name="user_name" value="{{ old('user_name', $user->user_name) }}" required><br><br>
+        <input type="text" name="user_name" value="{{ old('user_name', $user->user_name) }}" placeholder="Enter name" maxlength="100" data-name-field pattern="[A-Za-z]+" title="Name can contain only letters A-Z or a-z" required><br><br>
 
         <label>Phone Number:</label><br>
-        <input type="text" name="phone_no" value="{{ old('phone_no', $user->phone_no) }}" required><br><br>
+        <input type="text" name="phone_no" value="{{ old('phone_no', $user->phone_no) }}" pattern="[0-9]{10}" maxlength="10" inputmode="numeric" title="Phone number must contain exactly 10 digits" required><br><br>
 
         <label>User Role (Type):</label><br>
         <select name="user_type" required>
@@ -47,10 +47,11 @@
         </select><br><br>
 
         <label>Address:</label><br>
-        <input type="text" name="user_addr" value="{{ old('user_addr', $user->user_addr) }}"><br><br>
+        <input type="text" name="user_addr" value="{{ old('user_addr', $user->user_addr) }}" maxlength="255" pattern="[A-Za-z0-9 ,\-()]*" title="Address can contain letters, digits, spaces, commas, hyphens, and parentheses"><br><br>
 
         <button type="submit">Save Changes</button>
     </form>
 
 </body>
+<script src="{{ asset('js/name-validation.js') }}" defer></script>
 </html>

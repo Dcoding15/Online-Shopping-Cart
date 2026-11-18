@@ -9,7 +9,7 @@ uses(DatabaseTransactions::class);
 test('seller index displays list of sellers', function () {
     $admin = User::factory()->admin()->create();
     $seller = User::factory()->seller()->create([
-        'user_name' => 'Test Seller One',
+        'user_name' => 'TestSellerOne',
     ]);
     $page = intdiv(
         User::query()
@@ -22,7 +22,7 @@ test('seller index displays list of sellers', function () {
     $response = $this->actingAs($admin)->get(route('seller.index', ['page' => $page]));
 
     $response->assertStatus(200);
-    $response->assertSee('Test Seller One');
+    $response->assertSee('TestSellerOne');
 });
 
 test('can create a seller', function () {
@@ -30,7 +30,7 @@ test('can create a seller', function () {
     $phone = '999'.rand(1000000, 9999999);
 
     $response = $this->actingAs($admin)->post(route('seller.store'), [
-        'user_name' => 'New Seller Test',
+        'user_name' => 'NewSellerTest',
         'phone_no' => $phone,
         'user_addr' => '123 Market Street',
         'date_of_birth' => '1990-05-15',
@@ -41,7 +41,7 @@ test('can create a seller', function () {
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('users', [
-        'user_name' => 'New Seller Test',
+        'user_name' => 'NewSellerTest',
         'phone_no' => $phone,
         'user_type' => 'seller',
     ]);
@@ -52,7 +52,7 @@ test('seller creation rejects a weak password', function () {
     $phone = '999'.rand(1000000, 9999999);
 
     $this->actingAs($admin)->post(route('seller.store'), [
-        'user_name' => 'Weak Password Seller',
+        'user_name' => 'WeakPasswordSeller',
         'phone_no' => $phone,
         'password' => 'secret123',
     ])->assertSessionHasErrors('password');
@@ -64,11 +64,11 @@ test('can update a seller', function () {
     $admin = User::factory()->admin()->create();
     $seller = User::factory()->create([
         'user_type' => 'seller',
-        'user_name' => 'Original Seller',
+        'user_name' => 'OriginalSeller',
     ]);
 
     $response = $this->actingAs($admin)->put(route('seller.update', $seller->user_id), [
-        'user_name' => 'Updated Seller Name',
+        'user_name' => 'UpdatedSellerName',
         'phone_no' => $seller->phone_no,
         'user_addr' => '456 Updated Ave',
         'date_of_birth' => '1992-01-01',
@@ -79,7 +79,7 @@ test('can update a seller', function () {
 
     $this->assertDatabaseHas('users', [
         'user_id' => $seller->user_id,
-        'user_name' => 'Updated Seller Name',
+        'user_name' => 'UpdatedSellerName',
         'user_addr' => '456 Updated Ave',
     ]);
 });

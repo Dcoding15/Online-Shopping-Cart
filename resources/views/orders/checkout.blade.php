@@ -64,7 +64,7 @@
     <form id="payment-form" action="{{ route('orders.store') }}" method="POST">
         @csrf
         <label for="shipping_address">Delivery Address:</label><br>
-        <textarea id="shipping_address" name="shipping_address" rows="3" cols="50" maxlength="255" required>{{ old('shipping_address', $buyer->user_addr) }}</textarea>
+        <textarea id="shipping_address" name="shipping_address" rows="3" cols="50" maxlength="255" data-address-field title="Address can contain letters, digits, spaces, commas, hyphens, and parentheses" required>{{ old('shipping_address', $buyer->user_addr) }}</textarea>
         <br><br>
         <button id="pay-button" type="submit">Continue to Razorpay Payment</button>
     </form>
@@ -162,4 +162,5 @@
         });
     </script>
 </body>
+<script src="{{ asset('js/address-validation.js') }}" defer></script>
 </html>
