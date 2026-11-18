@@ -96,7 +96,7 @@
                             <div class="product-kicker"><span>{{ $product->product_category }}</span><span aria-hidden="true">/</span><span>{{ $product->product_type }}</span></div>
                             <h3 class="product-name"><a href="{{ route('products.show', $product->product_id) }}">{{ $product->product_name }}</a></h3>
                             <p class="product-description">{{ !empty($product->product_description) ? Str::limit($product->product_description, 78) : 'A considered find from '.($product->seller->user_name ?? 'our marketplace').'.' }}</p>
-                            <div class="product-footer"><strong class="product-price">₹{{ number_format($product->product_price, 2) }}</strong><a class="product-action" href="{{ route('products.show', $product->product_id) }}">View item <span aria-hidden="true">↗</span></a></div>
+                            <div class="product-footer"><strong class="product-price">₹{{ number_format($product->product_price, 2) }}</strong><a class="product-action" href="{{ route('products.show', $product->product_id) }}">View item <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
                         </div>
                     </article>
                 @endforeach

@@ -1,3 +1,5 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css');
+
 :root {
     color-scheme: light;
     --paper: #f4f7f2;
@@ -91,14 +93,8 @@ button:disabled { border-color: #aab7ad; background: #aab7ad; cursor: not-allowe
     transform: none;
 }
 
-.password-toggle svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+.password-toggle i {
+    font-size: 18px;
 }
 
 .password-toggle .eye-open { display: none; }

@@ -118,7 +118,7 @@
             &nbsp;&nbsp;
             <a href="{{ route('products.index') }}">Continue Shopping</a>
             &nbsp;&nbsp;
-            <a href="{{ route('checkout') }}" style="font-weight: bold; font-size: 1.1em;">Proceed to Checkout →</a>
+            <a href="{{ route('checkout') }}" style="font-weight: bold; font-size: 1.1em;">Proceed to Checkout <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </div>
     @endif
 

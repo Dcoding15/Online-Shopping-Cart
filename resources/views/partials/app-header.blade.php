@@ -1,6 +1,6 @@
 <header class="site-header">
     <a class="brand" href="{{ route('products.index') }}">
-        <span class="brand-mark" aria-hidden="true">m</span>
+        <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-store"></i></span>
         <span>Market</span>
     </a>
     @auth
